@@ -29,7 +29,7 @@ struct svgtiny_list {
 
 struct svgtiny_list *svgtiny_list_create(size_t item_size)
 {
-	struct svgtiny_list *list = malloc(sizeof *list);
+	struct svgtiny_list *list = (svgtiny_list *) malloc(sizeof *list);
 	if (!list)
 		return 0;
 	list->size = 0;
@@ -81,7 +81,7 @@ svgtiny_code svgtiny_list_resize(struct svgtiny_list *list,
 
 	list->size = new_size;
 	list->allocated = new_allocated;
-	list->items = new_items;
+	list->items = (char *) new_items;
 
 	return svgtiny_OK;
 }
