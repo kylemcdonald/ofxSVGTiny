@@ -13,7 +13,7 @@
 
 #undef GRADIENT_DEBUG
 
-static svgtiny_code svgtiny_parse_linear_gradient(xmlNode *linear,
+static svgtiny_code svgtiny_parse_linear_gradient(TiXmlElement *linear,
 		struct svgtiny_parse_state *state);
 static float svgtiny_parse_gradient_offset(const char *s);
 static void svgtiny_path_bbox(float *p, unsigned int n,
@@ -27,7 +27,7 @@ static void svgtiny_invert_matrix(float *m, float *inv);
 
 void svgtiny_find_gradient(const char *id, struct svgtiny_parse_state *state)
 {
-	xmlNode *gradient;
+	TiXmlElement *gradient;
 
 	fprintf(stderr, "svgtiny_find_gradient: id \"%s\"\n", id);
 
@@ -44,16 +44,17 @@ void svgtiny_find_gradient(const char *id, struct svgtiny_parse_state *state)
 	state->gradient_transform.e = 0;
 	state->gradient_transform.f = 0;
 
-	gradient = svgtiny_find_element_by_id(
-			(xmlNode *) state->document, id);
+    TiXmlDocument *d = state->document;
+    
+	gradient = svgtiny_find_element_by_id( d->RootElement(), id);
 	fprintf(stderr, "gradient %p\n", (void *) gradient);
 	if (!gradient) {
 		fprintf(stderr, "gradient \"%s\" not found\n", id);
 		return;
 	}
 
-	fprintf(stderr, "gradient name \"%s\"\n", gradient->name);
-	if (strcmp((const char *) gradient->name, "linearGradient") == 0) {
+	fprintf(stderr, "gradient name \"%s\"\n", gradient->Value());
+	if (strcmp((const char *) gradient->Value(), "linearGradient") == 0) {
 		svgtiny_parse_linear_gradient(gradient, state);
 	}
 }
@@ -65,20 +66,34 @@ void svgtiny_find_gradient(const char *id, struct svgtiny_parse_state *state)
  * http://www.w3.org/TR/SVG11/pservers#LinearGradients
  */
 
-svgtiny_code svgtiny_parse_linear_gradient(xmlNode *linear,
+svgtiny_code svgtiny_parse_linear_gradient(TiXmlElement *linear,
 		struct svgtiny_parse_state *state)
 {
 	unsigned int i = 0;
-	xmlNode *stop;
-	xmlAttr *attr;
-	xmlAttr *href = xmlHasProp(linear, (const xmlChar *) "href");
-	if (href && href->children->content[0] == '#')
-		svgtiny_find_gradient((const char *) href->children->content
-				+ 1, state);
+	TiXmlElement *stop;
+	TiXmlAttribute *attr;
+	//TiXmlAttribute *href = xmlHasProp(linear, (const xmlChar *) "href");
+	//if (href && href->children->content[0] == '#')
+	//	svgtiny_find_gradient((const char *) href->children->content
+	//			+ 1, state);
+    
+    
+    TiXmlElement *href = (TiXmlElement *) linear->FirstChild("href");
+    if (href && href->Value()[0] == '#') {
+        svgtiny_find_gradient((const char *) &href->Value()[0], state);
+    }
+    
 
-	for (attr = linear->properties; attr; attr = attr->next) {
-		const char *name = (const char *) attr->name;
-		const char *content = (const char *) attr->children->content;
+	//for (attr = linear->properties; attr; attr = attr->next) {
+    
+    for( attr = linear->FirstAttribute(); attr; attr = attr->Next() ) {
+    
+		//const char *name = (const char *) attr->name;
+		//const char *content = (const char *) attr->children->content;
+        
+        const char *name = (const char *) attr->Name();
+		const char *content = (const char *) attr->Value();
+        
 		if (strcmp(name, "x1") == 0)
 			state->gradient_x1 = content;
 		else if (strcmp(name, "y1") == 0)
@@ -108,20 +123,30 @@ svgtiny_code svgtiny_parse_linear_gradient(xmlNode *linear,
 		}
         }
 
-	for (stop = linear->children; stop; stop = stop->next) {
+	//for (stop = linear->children; stop; stop = stop->next) {
+    for( stop = (TiXmlElement*) linear->FirstChild( false ); stop; stop = (TiXmlElement*) stop->NextSibling( false ) ) {
+    
 		float offset = -1;
 		svgtiny_colour color = svgtiny_TRANSPARENT;
 
-		if (stop->type != XML_ELEMENT_NODE)
-			continue;
-		if (strcmp((const char *) stop->name, "stop") != 0)
+		//if (stop->type != XML_ELEMENT_NODE)
+		//	continue;
+        
+		if (strcmp((const char *) stop->Value(), "stop") != 0)
 			continue;
 
-		for (attr = stop->properties; attr;
-				attr = attr->next) {
-			const char *name = (const char *) attr->name;
-			const char *content =
-					(const char *) attr->children->content;
+		//for (attr = stop->properties; attr;
+		//		attr = attr->next) {
+        
+        for( attr = stop->FirstAttribute(); attr; attr = attr->Next() ) {
+        
+			//const char *name = (const char *) attr->name;
+			//const char *content =
+			//		(const char *) attr->children->content;
+            
+            const char *name = (const char *) attr->Name();
+            const char *content = (const char *) attr->Value();
+            
 			if (strcmp(name, "offset") == 0)
 				offset = svgtiny_parse_gradient_offset(content);
 			else if (strcmp(name, "stop-color") == 0)
@@ -330,7 +355,7 @@ svgtiny_code svgtiny_add_path_linear_gradient(float *p, unsigned int n,
 		r0 = ((x0_trans - gradient_x0) * gradient_dx +
 				(y0_trans - gradient_y0) * gradient_dy) /
 				gradient_norm_squared;
-		point = svgtiny_list_push(pts);
+		point = (grad_point *) svgtiny_list_push(pts);
 		if (!point) {
 			svgtiny_list_free(pts);
 			return svgtiny_OUT_OF_MEMORY;
@@ -398,7 +423,7 @@ svgtiny_code svgtiny_add_path_linear_gradient(float *p, unsigned int n,
 					(y_trans - gradient_y0) * gradient_dy) /
 					gradient_norm_squared;
 			fprintf(stderr, "(%g %g [%g]) ", x, y, r);
-			point = svgtiny_list_push(pts);
+			point = (grad_point *) svgtiny_list_push(pts);
 			if (!point) {
 				svgtiny_list_free(pts);
 				return svgtiny_OUT_OF_MEMORY;
@@ -433,9 +458,9 @@ svgtiny_code svgtiny_add_path_linear_gradient(float *p, unsigned int n,
 	a = (min_pt + 1) % svgtiny_list_size(pts);
 	b = min_pt == 0 ? svgtiny_list_size(pts) - 1 : min_pt - 1;
 	while (a != b) {
-		struct grad_point *point_t = svgtiny_list_get(pts, t);
-		struct grad_point *point_a = svgtiny_list_get(pts, a);
-		struct grad_point *point_b = svgtiny_list_get(pts, b);
+		struct grad_point *point_t = (grad_point *) svgtiny_list_get(pts, t);
+		struct grad_point *point_a = (grad_point *) svgtiny_list_get(pts, a);
+		struct grad_point *point_b = (grad_point *) svgtiny_list_get(pts, b);
 		float mean_r = (point_t->r + point_a->r + point_b->r) / 3;
 		float *p;
 		struct svgtiny_shape *shape;
@@ -460,7 +485,7 @@ svgtiny_code svgtiny_add_path_linear_gradient(float *p, unsigned int n,
 			current_stop_r = state->
 					gradient_stop[current_stop].offset;
 		}
-		p = malloc(10 * sizeof p[0]);
+		p = (float *) malloc(10 * sizeof p[0]);
 		if (!p)
 			return svgtiny_OUT_OF_MEMORY;
 		p[0] = svgtiny_PATH_MOVE;
@@ -647,20 +672,33 @@ void svgtiny_invert_matrix(float *m, float *inv)
  * Find an element in the document by id.
  */
 
-xmlNode *svgtiny_find_element_by_id(xmlNode *node, const char *id)
+TiXmlElement *svgtiny_find_element_by_id(TiXmlElement *node, const char *id)
 {
-	xmlNode *child;
-	xmlNode *found;
+	TiXmlNode *child;
+	TiXmlElement *found;
 
-	for (child = node->children; child; child = child->next) {
-		xmlAttr *attr;
-		if (child->type != XML_ELEMENT_NODE)
-			continue;
-		attr = xmlHasProp(child, (const xmlChar *) "id");
-		if (attr && strcmp(id, (const char *) attr->children->content)
-				== 0)
-			return child;
-		found = svgtiny_find_element_by_id(child, id);
+	//for (child = node->children; child; child = child->next) {
+    for( child = node->FirstChild( false ); child; child = child->NextSibling( false ) ) {
+    
+		TiXmlAttribute *attr;
+		//if (child->type != XML_ELEMENT_NODE)
+		//	continue;
+        
+		//attr = xmlHasProp(child, (const xmlChar *) "id");
+        
+        // it could be an attribute
+        for( attr = child->ToElement()->FirstAttribute(); attr; attr = attr->Next() ) {
+            if(strcmp(attr->Name(), id) == 0) {
+                return child->ToElement();
+            }
+        }
+        
+		//if (attr && strcmp(id, (const char *) attr->children->content) == 0)
+		//	return child;
+        
+        
+        // recurse
+		found = svgtiny_find_element_by_id(child->ToElement(), id);
 		if (found)
 			return found;
 	}

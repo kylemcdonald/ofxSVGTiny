@@ -8,7 +8,8 @@
 #ifndef SVGTINY_H
 #define SVGTINY_H
 
-#include <libxml/parser.h>
+//#include <libxml/parser.h>
+#include "tinyxml.h"
 
 typedef int svgtiny_colour;
 #define svgtiny_TRANSPARENT 0x1000000
