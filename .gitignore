@@ -1,4 +1,7 @@
-example-pulse/
+*.opensdf
+*.suo
+*.sdf
+*.ipch
 
 *.depend
 *.layout

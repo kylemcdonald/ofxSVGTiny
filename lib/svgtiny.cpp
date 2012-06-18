@@ -8,14 +8,22 @@
 #include <assert.h>
 #include <math.h>
 #include <setjmp.h>
-#include <stdbool.h>
+//#include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <libxml/parser.h>
-#include <libxml/debugXML.h>
+//#include <libxml/parser.h>
+//#include <libxml/debugXML.h>
+#include "tinyxml.h"
 #include "svgtiny.h"
 #include "svgtiny_internal.h"
+
+#ifdef _MSC_VER
+long lroundf (float x) {
+	long xl = (long) x;
+	return x - xl > .5 ? xl + 1 : xl;
+}  
+#endif
 
 #ifndef M_PI
 #define M_PI		3.14159265358979323846
@@ -23,30 +31,30 @@
 
 #define KAPPA		0.5522847498
 
-static svgtiny_code svgtiny_parse_svg(xmlNode *svg,
+static svgtiny_code svgtiny_parse_svg(TiXmlElement *svg,
 		struct svgtiny_parse_state state);
-static svgtiny_code svgtiny_parse_path(xmlNode *path,
+static svgtiny_code svgtiny_parse_path(TiXmlElement *path,
 		struct svgtiny_parse_state state);
-static svgtiny_code svgtiny_parse_rect(xmlNode *rect,
+static svgtiny_code svgtiny_parse_rect(TiXmlElement *rect,
 		struct svgtiny_parse_state state);
-static svgtiny_code svgtiny_parse_circle(xmlNode *circle,
+static svgtiny_code svgtiny_parse_circle(TiXmlElement *circle,
 		struct svgtiny_parse_state state);
-static svgtiny_code svgtiny_parse_ellipse(xmlNode *ellipse,
+static svgtiny_code svgtiny_parse_ellipse(TiXmlElement *ellipse,
 		struct svgtiny_parse_state state);
-static svgtiny_code svgtiny_parse_line(xmlNode *line,
+static svgtiny_code svgtiny_parse_line(TiXmlElement *line,
 		struct svgtiny_parse_state state);
-static svgtiny_code svgtiny_parse_poly(xmlNode *poly,
+static svgtiny_code svgtiny_parse_poly(TiXmlElement *poly,
 		struct svgtiny_parse_state state, bool polygon);
-static svgtiny_code svgtiny_parse_text(xmlNode *text,
+static svgtiny_code svgtiny_parse_text(TiXmlElement *text,
 		struct svgtiny_parse_state state);
-static void svgtiny_parse_position_attributes(const xmlNode *node,
+static void svgtiny_parse_position_attributes(const TiXmlElement *node,
 		const struct svgtiny_parse_state state,
 		float *x, float *y, float *width, float *height);
-static void svgtiny_parse_paint_attributes(const xmlNode *node,
+static void svgtiny_parse_paint_attributes(const TiXmlElement *node,
 		struct svgtiny_parse_state *state);
-static void svgtiny_parse_font_attributes(const xmlNode *node,
+static void svgtiny_parse_font_attributes(const TiXmlElement *node,
 		struct svgtiny_parse_state *state);
-static void svgtiny_parse_transform_attributes(xmlNode *node,
+static void svgtiny_parse_transform_attributes(TiXmlElement *node,
 		struct svgtiny_parse_state *state);
 static svgtiny_code svgtiny_add_path(float *p, unsigned int n,
 		struct svgtiny_parse_state *state);
@@ -60,7 +68,7 @@ struct svgtiny_diagram *svgtiny_create(void)
 {
 	struct svgtiny_diagram *diagram;
 
-	diagram = malloc(sizeof *diagram);
+	diagram = (svgtiny_diagram *) malloc(sizeof *diagram);
 	if (!diagram)
 		return 0;
 
@@ -81,8 +89,8 @@ svgtiny_code svgtiny_parse(struct svgtiny_diagram *diagram,
 		const char *buffer, size_t size, const char *url,
 		int viewport_width, int viewport_height)
 {
-	xmlDoc *document;
-	xmlNode *svg;
+	TiXmlDocument document;
+	TiXmlElement *svg;
 	struct svgtiny_parse_state state;
 	float x, y, width, height;
 	svgtiny_code code;
@@ -92,23 +100,28 @@ svgtiny_code svgtiny_parse(struct svgtiny_diagram *diagram,
 	assert(url);
 
 	/* parse XML to tree */
-	document = xmlReadMemory(buffer, size, url, 0,
-			XML_PARSE_NONET | XML_PARSE_COMPACT);
-	if (!document)
-		return svgtiny_LIBXML_ERROR;
+	//document = xmlReadMemory(buffer, size, url, 0, XML_PARSE_NONET | XML_PARSE_COMPACT);
+    //const char* pBuf, size_t sz, TiXmlEncoding encoding)
+    document.ReadFromMemory(buffer, size);
+
+	//if (!document)
+	//	return svgtiny_LIBXML_ERROR;
 
 	/*xmlDebugDumpDocument(stderr, document);*/
 
 	/* find root <svg> element */
-	svg = xmlDocGetRootElement(document);
+	//svg = xmlDocGetRootElement(document);
+    
+    svg = document.RootElement();
+    
 	if (!svg)
 		return svgtiny_NOT_SVG;
-	if (strcmp((const char *) svg->name, "svg") != 0)
+	if (strcmp((const char *) svg->Value(), "svg") != 0)
 		return svgtiny_NOT_SVG;
 
 	/* get graphic dimensions */
 	state.diagram = diagram;
-	state.document = document;
+	state.document = &document;
 	state.viewport_width = viewport_width;
 	state.viewport_height = viewport_height;
 	svgtiny_parse_position_attributes(svg, state, &x, &y, &width, &height);
@@ -135,7 +148,7 @@ svgtiny_code svgtiny_parse(struct svgtiny_diagram *diagram,
 	code = svgtiny_parse_svg(svg, state);
 
 	/* free XML tree */
-	xmlFreeDoc(document);
+	//xmlFreeDoc(document);
 
 	return code;
 }
@@ -145,21 +158,33 @@ svgtiny_code svgtiny_parse(struct svgtiny_diagram *diagram,
  * Parse a <svg> or <g> element node.
  */
 
-svgtiny_code svgtiny_parse_svg(xmlNode *svg,
+svgtiny_code svgtiny_parse_svg(TiXmlElement *svg,
 		struct svgtiny_parse_state state)
 {
 	float x, y, width, height;
-	xmlAttr *view_box;
-	xmlNode *child;
+	TiXmlAttribute *view_box;
+	TiXmlElement *child;
 
 	svgtiny_parse_position_attributes(svg, state, &x, &y, &width, &height);
 	svgtiny_parse_paint_attributes(svg, &state);
 	svgtiny_parse_font_attributes(svg, &state);
 
 	/* parse viewBox */
-	view_box = xmlHasProp(svg, (const xmlChar *) "viewBox");
+	//view_box = xmlHasProp(svg, (const xmlChar *) "viewBox");
+    
+    TiXmlAttribute *first = svg->FirstAttribute();
+    while(first->Next()) {
+        if(strcmp(first->Name(), "viewBox") == 0) {
+            view_box = first;
+            break;
+        } else {
+            first = first->Next();
+        }
+    }
+    
 	if (view_box) {
-		const char *s = (const char *) view_box->children->content;
+		//const char *s = (const char *) view_box->children->content;
+        const char *s = (const char *) view_box->Value();
 		float min_x, min_y, vwidth, vheight;
 		if (sscanf(s, "%f,%f,%f,%f",
 				&min_x, &min_y, &vwidth, &vheight) == 4 ||
@@ -174,11 +199,13 @@ svgtiny_code svgtiny_parse_svg(xmlNode *svg,
 
 	svgtiny_parse_transform_attributes(svg, &state);
 
-	for (child = svg->children; child; child = child->next) {
+	//for (child = svg->children; child; child = child->next) {
+    for( child = (TiXmlElement*) svg->FirstChild(); child; child = (TiXmlElement*) child->NextSibling() ) {
 		svgtiny_code code = svgtiny_OK;
 
-		if (child->type == XML_ELEMENT_NODE) {
-			const char *name = (const char *) child->name;
+        // I think this can't happen?
+		//if (child->type == XML_ELEMENT_NODE) {
+			const char *name = (const char *) child->Value();
 			if (strcmp(name, "svg") == 0)
 				code = svgtiny_parse_svg(child, state);
 			else if (strcmp(name, "g") == 0)
@@ -201,7 +228,7 @@ svgtiny_code svgtiny_parse_svg(xmlNode *svg,
 				code = svgtiny_parse_poly(child, state, true);
 			else if (strcmp(name, "text") == 0)
 				code = svgtiny_parse_text(child, state);
-		}
+		//}
 
 		if (code != svgtiny_OK)
 			return code;
@@ -218,7 +245,7 @@ svgtiny_code svgtiny_parse_svg(xmlNode *svg,
  * http://www.w3.org/TR/SVG11/paths#PathElement
  */
 
-svgtiny_code svgtiny_parse_path(xmlNode *path,
+svgtiny_code svgtiny_parse_path(TiXmlElement *path,
 		struct svgtiny_parse_state state)
 {
 	char *s, *path_d;
@@ -232,15 +259,16 @@ svgtiny_code svgtiny_parse_path(xmlNode *path,
 	svgtiny_parse_transform_attributes(path, &state);
 
 	/* read d attribute */
-	s = path_d = (char *) xmlGetProp(path, (const xmlChar *) "d");
+	//s = path_d = (char *) xmlGetProp(path, (const xmlChar *) "d");
+    s = path_d = (char *) path->Attribute("d");
 	if (!s) {
-		state.diagram->error_line = path->line;
+		//state.diagram->error_line = path->line;
 		state.diagram->error_message = "path: missing d attribute";
 		return svgtiny_SVG_ERROR;
 	}
 
 	/* allocate space for path: it will never have more elements than d */
-	p = malloc(sizeof p[0] * strlen(s));
+	p = (float*) malloc(sizeof p[0] * strlen(s));
 	if (!p)
 		return svgtiny_OUT_OF_MEMORY;
 
@@ -432,7 +460,10 @@ svgtiny_code svgtiny_parse_path(xmlNode *path,
 		}
 	}
 
-	xmlFree(path_d);
+	//xmlFree(path_d);
+    if(path_d) {
+        //delete path_d;
+    }
 
 	if (i <= 4) {
 		/* no real segments in path */
@@ -450,7 +481,7 @@ svgtiny_code svgtiny_parse_path(xmlNode *path,
  * http://www.w3.org/TR/SVG11/shapes#RectElement
  */
 
-svgtiny_code svgtiny_parse_rect(xmlNode *rect,
+svgtiny_code svgtiny_parse_rect(TiXmlElement *rect,
 		struct svgtiny_parse_state state)
 {
 	float x, y, width, height;
@@ -461,7 +492,7 @@ svgtiny_code svgtiny_parse_rect(xmlNode *rect,
 	svgtiny_parse_paint_attributes(rect, &state);
 	svgtiny_parse_transform_attributes(rect, &state);
 
-	p = malloc(13 * sizeof p[0]);
+	p =(float *) malloc(13 * sizeof p[0]);
 	if (!p)
 		return svgtiny_OUT_OF_MEMORY;
 
@@ -487,16 +518,22 @@ svgtiny_code svgtiny_parse_rect(xmlNode *rect,
  * Parse a <circle> element node.
  */
 
-svgtiny_code svgtiny_parse_circle(xmlNode *circle,
+svgtiny_code svgtiny_parse_circle(TiXmlElement *circle,
 		struct svgtiny_parse_state state)
 {
 	float x = 0, y = 0, r = -1;
 	float *p;
-	xmlAttr *attr;
+	//xmlAttr *attr;
+    TiXmlAttribute *attr;
 
-	for (attr = circle->properties; attr; attr = attr->next) {
-		const char *name = (const char *) attr->name;
-		const char *content = (const char *) attr->children->content;
+	//for (attr = circle->properties; attr; attr = attr->next) {
+    for( attr = circle->FirstAttribute(); attr; attr = attr->Next() ) {
+		//const char *name = (const char *) attr->name;
+		//const char *content = (const char *) attr->children->content;
+        
+        const char *name = (const char *) attr->Name();
+		const char *content = (const char *) attr->Value();
+        
 		if (strcmp(name, "cx") == 0)
 			x = svgtiny_parse_length(content,
 					state.viewport_width, state);
@@ -511,14 +548,16 @@ svgtiny_code svgtiny_parse_circle(xmlNode *circle,
 	svgtiny_parse_transform_attributes(circle, &state);
 
 	if (r < 0) {
-		state.diagram->error_line = circle->line;
+        // how to figure?
+		//state.diagram->error_line = circle->line;
+        
 		state.diagram->error_message = "circle: r missing or negative";
 		return svgtiny_SVG_ERROR;
 	}
 	if (r == 0)
 		return svgtiny_OK;
 
-	p = malloc(32 * sizeof p[0]);
+	p = (float *) malloc(32 * sizeof p[0]);
 	if (!p)
 		return svgtiny_OUT_OF_MEMORY;
 
@@ -563,16 +602,21 @@ svgtiny_code svgtiny_parse_circle(xmlNode *circle,
  * Parse an <ellipse> element node.
  */
 
-svgtiny_code svgtiny_parse_ellipse(xmlNode *ellipse,
+svgtiny_code svgtiny_parse_ellipse(TiXmlElement *ellipse,
 		struct svgtiny_parse_state state)
 {
 	float x = 0, y = 0, rx = -1, ry = -1;
 	float *p;
-	xmlAttr *attr;
+	TiXmlAttribute *attr;
 
-	for (attr = ellipse->properties; attr; attr = attr->next) {
-		const char *name = (const char *) attr->name;
-		const char *content = (const char *) attr->children->content;
+	//for (attr = ellipse->properties; attr; attr = attr->next) {
+    for( attr = ellipse->FirstAttribute(); attr; attr = attr->Next() ) {
+		//const char *name = (const char *) attr->name;
+		//const char *content = (const char *) attr->children->content;
+        
+        const char *name = (const char *) attr->Name();
+		const char *content = (const char *) attr->Value();
+        
 		if (strcmp(name, "cx") == 0)
 			x = svgtiny_parse_length(content,
 					state.viewport_width, state);
@@ -590,7 +634,7 @@ svgtiny_code svgtiny_parse_ellipse(xmlNode *ellipse,
 	svgtiny_parse_transform_attributes(ellipse, &state);
 
 	if (rx < 0 || ry < 0) {
-		state.diagram->error_line = ellipse->line;
+		//state.diagram->error_line = ellipse->line;
 		state.diagram->error_message = "ellipse: rx or ry missing "
 				"or negative";
 		return svgtiny_SVG_ERROR;
@@ -598,7 +642,7 @@ svgtiny_code svgtiny_parse_ellipse(xmlNode *ellipse,
 	if (rx == 0 || ry == 0)
 		return svgtiny_OK;
 
-	p = malloc(32 * sizeof p[0]);
+	p = (float*) malloc(32 * sizeof p[0]);
 	if (!p)
 		return svgtiny_OUT_OF_MEMORY;
 
@@ -643,16 +687,22 @@ svgtiny_code svgtiny_parse_ellipse(xmlNode *ellipse,
  * Parse a <line> element node.
  */
 
-svgtiny_code svgtiny_parse_line(xmlNode *line,
+svgtiny_code svgtiny_parse_line(TiXmlElement *line,
 		struct svgtiny_parse_state state)
 {
 	float x1 = 0, y1 = 0, x2 = 0, y2 = 0;
 	float *p;
-	xmlAttr *attr;
+	//xmlAttr *attr;
+    TiXmlAttribute *attr;
 
-	for (attr = line->properties; attr; attr = attr->next) {
-		const char *name = (const char *) attr->name;
-		const char *content = (const char *) attr->children->content;
+	//for (attr = line->properties; attr; attr = attr->next) {
+    for( attr = line->FirstAttribute(); attr; attr = attr->Next() ) {
+		//const char *name = (const char *) attr->name;
+		//const char *content = (const char *) attr->children->content;
+        
+        const char *name = (const char *) attr->Name();
+		const char *content = (const char *) attr->Value();
+        
 		if (strcmp(name, "x1") == 0)
 			x1 = svgtiny_parse_length(content,
 					state.viewport_width, state);
@@ -669,7 +719,7 @@ svgtiny_code svgtiny_parse_line(xmlNode *line,
 	svgtiny_parse_paint_attributes(line, &state);
 	svgtiny_parse_transform_attributes(line, &state);
 
-	p = malloc(7 * sizeof p[0]);
+	p = (float*) malloc(7 * sizeof p[0]);
 	if (!p)
 		return svgtiny_OUT_OF_MEMORY;
 
@@ -692,7 +742,7 @@ svgtiny_code svgtiny_parse_line(xmlNode *line,
  * http://www.w3.org/TR/SVG11/shapes#PolygonElement
  */
 
-svgtiny_code svgtiny_parse_poly(xmlNode *poly,
+svgtiny_code svgtiny_parse_poly(TiXmlElement *poly,
 		struct svgtiny_parse_state state, bool polygon)
 {
 	char *s, *points;
@@ -703,18 +753,22 @@ svgtiny_code svgtiny_parse_poly(xmlNode *poly,
 	svgtiny_parse_transform_attributes(poly, &state);
 
 	/* read points attribute */
-	s = points = (char *) xmlGetProp(poly, (const xmlChar *) "points");
+	//s = points = (char *) xmlGetProp(poly, (const xmlChar *) "points");
+    
+    s = points = (char *) poly->Attribute("points");
+    
 	if (!s) {
-		state.diagram->error_line = poly->line;
+		//state.diagram->error_line = poly->line;
 		state.diagram->error_message =
 				"polyline/polygon: missing points attribute";
 		return svgtiny_SVG_ERROR;
 	}
 
 	/* allocate space for path: it will never have more elements than s */
-	p = malloc(sizeof p[0] * strlen(s));
+	p = (float*) malloc(sizeof p[0] * strlen(s));
 	if (!p) {
-		xmlFree(points);
+        //xmlFree(points);
+        free(points);
 		return svgtiny_OUT_OF_MEMORY;
 	}
 
@@ -742,7 +796,8 @@ svgtiny_code svgtiny_parse_poly(xmlNode *poly,
         if (polygon)
 		p[i++] = svgtiny_PATH_CLOSE;
 
-	xmlFree(points);
+	//xmlFree(points);
+    free(points);
 
 	return svgtiny_add_path(p, i, &state);
 }
@@ -752,12 +807,12 @@ svgtiny_code svgtiny_parse_poly(xmlNode *poly,
  * Parse a <text> or <tspan> element node.
  */
 
-svgtiny_code svgtiny_parse_text(xmlNode *text,
+svgtiny_code svgtiny_parse_text(TiXmlElement *text,
 		struct svgtiny_parse_state state)
 {
 	float x, y, width, height;
 	float px, py;
-	xmlNode *child;
+	TiXmlElement *child;
 
 	svgtiny_parse_position_attributes(text, state,
 			&x, &y, &width, &height);
@@ -766,27 +821,36 @@ svgtiny_code svgtiny_parse_text(xmlNode *text,
 
 	px = state.ctm.a * x + state.ctm.c * y + state.ctm.e;
 	py = state.ctm.b * x + state.ctm.d * y + state.ctm.f;
+    
 /* 	state.ctm.e = px - state.origin_x; */
 /* 	state.ctm.f = py - state.origin_y; */
 
 	/*struct css_style style = state.style;
 	style.font_size.value.length.value *= state.ctm.a;*/
 
-	for (child = text->children; child; child = child->next) {
+	//for (child = text->children; child; child = child->next) {
+    for( child = (TiXmlElement*) text->FirstChild( false ); child; child = (TiXmlElement*) child->NextSibling( false ) ) {
+    
 		svgtiny_code code = svgtiny_OK;
 
-		if (child->type == XML_TEXT_NODE) {
+		if (strcmp(child->Value(), "text") == 0) 
+        {
 			struct svgtiny_shape *shape = svgtiny_add_shape(&state);
-			if (!shape)
+			
+            if (!shape)
 				return svgtiny_OUT_OF_MEMORY;
-			shape->text = strdup((const char *) child->content);
+            
+			//shape->text = strdup((const char *) child->content);
+            
+            shape->text = strdup((const char *) child->Value());
+            
 			shape->text_x = px;
 			shape->text_y = py;
 			state.diagram->shape_count++;
 
-		} else if (child->type == XML_ELEMENT_NODE &&
-				strcmp((const char *) child->name,
-					"tspan") == 0) {
+		} 
+        else if (strcmp((const char *) child->Value(), "tspan") == 0) 
+        {
 			code = svgtiny_parse_text(child, state);
 		}
 
@@ -802,20 +866,27 @@ svgtiny_code svgtiny_parse_text(xmlNode *text,
  * Parse x, y, width, and height attributes, if present.
  */
 
-void svgtiny_parse_position_attributes(const xmlNode *node,
+void svgtiny_parse_position_attributes(const TiXmlElement *node,
 		const struct svgtiny_parse_state state,
 		float *x, float *y, float *width, float *height)
 {
-	xmlAttr *attr;
+	//xmlAttr *attr;
+    const TiXmlAttribute *attr;
 
 	*x = 0;
 	*y = 0;
 	*width = state.viewport_width;
 	*height = state.viewport_height;
 
-	for (attr = node->properties; attr; attr = attr->next) {
-		const char *name = (const char *) attr->name;
-		const char *content = (const char *) attr->children->content;
+	//for (attr = node->properties; attr; attr = attr->next) {
+    for( attr = node->FirstAttribute(); attr; attr = attr->Next() ) {
+    
+		//const char *name = (const char *) attr->name;
+		//const char *content = (const char *) attr->children->content;
+        
+        const char *name = (const char *) attr->Name();
+		const char *content = (const char *) attr->Value();
+        
 		if (strcmp(name, "x") == 0)
 			*x = svgtiny_parse_length(content,
 					state.viewport_width, state);
@@ -876,14 +947,22 @@ float svgtiny_parse_length(const char *s, int viewport_size,
  * Parse paint attributes, if present.
  */
 
-void svgtiny_parse_paint_attributes(const xmlNode *node,
+void svgtiny_parse_paint_attributes(const TiXmlElement *node,
 		struct svgtiny_parse_state *state)
 {
-	const xmlAttr *attr;
+	//const xmlAttr *attr;
+    const TiXmlAttribute *attr;
 
-	for (attr = node->properties; attr; attr = attr->next) {
-		const char *name = (const char *) attr->name;
-		const char *content = (const char *) attr->children->content;
+	//for (attr = node->properties; attr; attr = attr->next) {
+    
+    for( attr = node->FirstAttribute(); attr; attr = attr->Next() ) {
+    
+		//const char *name = (const char *) attr->name;
+		//const char *content = (const char *) attr->children->content;
+        
+        const char *name = (const char *) attr->Name();
+		const char *content = (const char *) attr->Value();
+        
 		if (strcmp(name, "fill") == 0)
 			svgtiny_parse_color(content, &state->fill, state);
 		else if (strcmp(name, "stroke") == 0)
@@ -892,8 +971,10 @@ void svgtiny_parse_paint_attributes(const xmlNode *node,
 			state->stroke_width = svgtiny_parse_length(content,
 					state->viewport_width, *state);
 		else if (strcmp(name, "style") == 0) {
-			const char *style = (const char *)
-					attr->children->content;
+			//const char *style = (const char *) attr->children->content;
+            
+            const char *style = attr->Value();
+            
 			const char *s;
 			char *value;
 			if ((s = strstr(style, "fill:"))) {
@@ -994,24 +1075,35 @@ void svgtiny_parse_color(const char *s, svgtiny_colour *c,
  * Parse font attributes, if present.
  */
 
-void svgtiny_parse_font_attributes(const xmlNode *node,
+void svgtiny_parse_font_attributes(const TiXmlElement *node,
 		struct svgtiny_parse_state *state)
 {
-	const xmlAttr *attr;
+	//const xmlAttr *attr;
+    const TiXmlAttribute *attr;
 
 	UNUSED(state);
 
-	for (attr = node->properties; attr; attr = attr->next) {
-		if (strcmp((const char *) attr->name, "font-size") == 0) {
-			/*if (css_parse_length(
+	//for (attr = node->properties; attr; attr = attr->next) {
+        
+		/*if (strcmp((const char *) attr->Name(), "font-size") == 0) {
+			if (css_parse_length(
 					(const char *) attr->children->content,
 					&state->style.font_size.value.length,
 					true, true)) {
 				state->style.font_size.size =
 						CSS_FONT_SIZE_LENGTH;
 			}*/
-		}
-        }
+    
+        //if (node->Attribute("font-size")) {
+        //    if (css_parse_length( (const char *) node->Value(), &state->style.font_size.value.length, true, true)) 
+        //    {
+        //        state->style.font_size.size = CSS_FONT_SIZE_LENGTH;
+        //    }
+        //}
+    
+    
+		//}
+    //}
 }
 
 
@@ -1021,18 +1113,22 @@ void svgtiny_parse_font_attributes(const xmlNode *node,
  * http://www.w3.org/TR/SVG11/coords#TransformAttribute
  */
 
-void svgtiny_parse_transform_attributes(xmlNode *node,
+void svgtiny_parse_transform_attributes(TiXmlElement *node,
 		struct svgtiny_parse_state *state)
 {
 	char *transform;
 
 	/* parse transform */
-	transform = (char *) xmlGetProp(node, (const xmlChar *) "transform");
+	//transform = (char *) xmlGetProp(node, (const xmlChar *) "transform");
+    
+    transform = (char *) node->FirstChild("transform");
+    
 	if (transform) {
 		svgtiny_parse_transform(transform, &state->ctm.a, &state->ctm.b,
 				&state->ctm.c, &state->ctm.d,
 				&state->ctm.e, &state->ctm.f);
-		xmlFree(transform);
+		//xmlFree(transform);
+        free(transform);
 	}
 }
 
@@ -1149,9 +1245,8 @@ svgtiny_code svgtiny_add_path(float *p, unsigned int n,
 
 struct svgtiny_shape *svgtiny_add_shape(struct svgtiny_parse_state *state)
 {
-	struct svgtiny_shape *shape = realloc(state->diagram->shape,
-			(state->diagram->shape_count + 1) *
-			sizeof (state->diagram->shape[0]));
+	struct svgtiny_shape *shape = (svgtiny_shape *) realloc(state->diagram->shape,
+			(state->diagram->shape_count + 1) * sizeof (state->diagram->shape[0]));
 	if (!shape)
 		return 0;
 	state->diagram->shape = shape;
@@ -1240,7 +1335,7 @@ char *svgtiny_strndup(const char *s, size_t n)
 	for (len = 0; len != n && s[len]; len++)
 		continue;
 
-	s2 = malloc(len + 1);
+	s2 = (char*) malloc(len + 1);
 	if (s2 == NULL)
 		return NULL;
 

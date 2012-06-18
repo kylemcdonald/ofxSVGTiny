@@ -1,11 +1,14 @@
 #pragma once
 
 #include "ofMain.h"
+#include "tinyxml.h"
 
-extern "C"
-{
+//extern "C"
+//{
+
+#define __cplusplus
 #include "svgtiny.h"
-};
+//};
 
 class ofxSVGTiny
 {

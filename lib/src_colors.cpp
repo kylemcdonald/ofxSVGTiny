@@ -118,12 +118,12 @@ svgtiny_color_hash (register const char *str, register unsigned int len)
   return hval;
 }
 
-#ifdef __GNUC__
+/*#ifdef __GNUC__
 __inline
 #if defined __GNUC_STDC_INLINE__ || defined __GNUC_GNU_INLINE__
 __attribute__ ((__gnu_inline__))
 #endif
-#endif
+#endif*/
 const struct svgtiny_named_color *
 svgtiny_color_lookup (register const char *str, register unsigned int len)
 {
