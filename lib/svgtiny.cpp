@@ -172,8 +172,9 @@ svgtiny_code svgtiny_parse_svg(TiXmlElement *svg,
 	/* parse viewBox */
 	//view_box = xmlHasProp(svg, (const xmlChar *) "viewBox");
     
+	view_box = NULL;
     TiXmlAttribute *first = svg->FirstAttribute();
-    while(first->Next()) {
+    while(first != NULL && first->Next()) {
         if(strcmp(first->Name(), "viewBox") == 0) {
             view_box = first;
             break;
