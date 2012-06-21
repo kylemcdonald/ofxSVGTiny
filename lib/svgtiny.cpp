@@ -111,7 +111,6 @@ svgtiny_code svgtiny_parse(struct svgtiny_diagram *diagram,
 
 	/* find root <svg> element */
 	//svg = xmlDocGetRootElement(document);
-    
     svg = document.RootElement();
     
 	if (!svg)
@@ -148,6 +147,7 @@ svgtiny_code svgtiny_parse(struct svgtiny_diagram *diagram,
 	code = svgtiny_parse_svg(svg, state);
 
 	/* free XML tree */
+	// no need to free, since TiXmlDocument handles itself
 	//xmlFreeDoc(document);
 
 	return code;
@@ -162,7 +162,7 @@ svgtiny_code svgtiny_parse_svg(TiXmlElement *svg,
 		struct svgtiny_parse_state state)
 {
 	float x, y, width, height;
-	TiXmlAttribute *view_box;
+	const char *view_box;
 	TiXmlElement *child;
 
 	svgtiny_parse_position_attributes(svg, state, &x, &y, &width, &height);
@@ -171,25 +171,14 @@ svgtiny_code svgtiny_parse_svg(TiXmlElement *svg,
 
 	/* parse viewBox */
 	//view_box = xmlHasProp(svg, (const xmlChar *) "viewBox");
-    
-	view_box = NULL;
-    TiXmlAttribute *first = svg->FirstAttribute();
-    while(first != NULL && first->Next()) {
-        if(strcmp(first->Name(), "viewBox") == 0) {
-            view_box = first;
-            break;
-        } else {
-            first = first->Next();
-        }
-    }
-    
+	view_box = svg->Attribute("viewBox");
+
 	if (view_box) {
 		//const char *s = (const char *) view_box->children->content;
-        const char *s = (const char *) view_box->Value();
 		float min_x, min_y, vwidth, vheight;
-		if (sscanf(s, "%f,%f,%f,%f",
+		if (sscanf(view_box, "%f,%f,%f,%f",
 				&min_x, &min_y, &vwidth, &vheight) == 4 ||
-				sscanf(s, "%f %f %f %f",
+				sscanf(view_box, "%f %f %f %f",
 				&min_x, &min_y, &vwidth, &vheight) == 4) {
 			state.ctm.a = (float) state.viewport_width / vwidth;
 			state.ctm.d = (float) state.viewport_height / vheight;
