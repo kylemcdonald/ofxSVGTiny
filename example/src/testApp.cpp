@@ -9,12 +9,7 @@ void testApp::setup()
 	ofBackground(0);
 	ofSetColor(255);
 	
-	//svg.load("tiger.svg"); // works
-	//svg.load("slider-1.0.svg"); // broken
-	//svg.load("slider-1.1.svg"); // broken
-	//svg.load("slider-1.1-basic.svg"); // broken
-	//svg.load("slider-1.1-tiny.svg"); // broken
-	svg.load("slider-1.1-tiny+.svg"); // broken
+	svg.load("tiger.svg"); // works
 }
 
 float step;
