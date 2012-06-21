@@ -7,13 +7,17 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		27D81DE2158D2B9C00A29153 /* testApp.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 27D81DE0158D2B9C00A29153 /* testApp.cpp */; };
-		27D81DF2158D2BC300A29153 /* src_colors.c in Sources */ = {isa = PBXBuildFile; fileRef = 27D81DE9158D2BC300A29153 /* src_colors.c */; };
-		27D81DF3158D2BC300A29153 /* svgtiny.c in Sources */ = {isa = PBXBuildFile; fileRef = 27D81DEA158D2BC300A29153 /* svgtiny.c */; };
-		27D81DF4158D2BC300A29153 /* svgtiny_gradient.c in Sources */ = {isa = PBXBuildFile; fileRef = 27D81DEC158D2BC300A29153 /* svgtiny_gradient.c */; };
-		27D81DF5158D2BC300A29153 /* svgtiny_list.c in Sources */ = {isa = PBXBuildFile; fileRef = 27D81DEE158D2BC300A29153 /* svgtiny_list.c */; };
-		27D81DF6158D2BC300A29153 /* ofxSVGTiny.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 27D81DF0158D2BC300A29153 /* ofxSVGTiny.cpp */; };
-		27D81E32158D2C2400A29153 /* libxml2.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 27D81E31158D2C2400A29153 /* libxml2.dylib */; };
+		27BC9C4D15930A3A004D7F68 /* main.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 27BC9C4A15930A3A004D7F68 /* main.cpp */; };
+		27BC9C4E15930A3A004D7F68 /* testApp.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 27BC9C4B15930A3A004D7F68 /* testApp.cpp */; };
+		27C086E8159307220036906F /* ofxSVGTiny.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 27C086E2159307220036906F /* ofxSVGTiny.cpp */; };
+		27C08747159307400036906F /* tinyxml.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 27C08740159307400036906F /* tinyxml.cpp */; };
+		27C08748159307400036906F /* tinyxmlerror.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 27C08742159307400036906F /* tinyxmlerror.cpp */; };
+		27C08749159307400036906F /* tinyxmlparser.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 27C08743159307400036906F /* tinyxmlparser.cpp */; };
+		27C0874A159307400036906F /* ofxXmlSettings.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 27C08745159307400036906F /* ofxXmlSettings.cpp */; };
+		27C08763159308320036906F /* src_colors.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 27C0875D159308320036906F /* src_colors.cpp */; };
+		27C08764159308320036906F /* svgtiny_gradient.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 27C0875E159308320036906F /* svgtiny_gradient.cpp */; };
+		27C08765159308320036906F /* svgtiny_list.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 27C08760159308320036906F /* svgtiny_list.cpp */; };
+		27C08766159308320036906F /* svgtiny.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 27C08761159308320036906F /* svgtiny.cpp */; };
 		BBAB23CB13894F3D00AA2426 /* GLUT.framework in CopyFiles */ = {isa = PBXBuildFile; fileRef = BBAB23BE13894E4700AA2426 /* GLUT.framework */; };
 		E4328149138ABC9F0047C5CB /* openFrameworksDebug.a in Frameworks */ = {isa = PBXBuildFile; fileRef = E4328148138ABC890047C5CB /* openFrameworksDebug.a */; };
 		E45BE97B0E8CC7DD009D7055 /* AGL.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = E45BE9710E8CC7DD009D7055 /* AGL.framework */; };
@@ -25,7 +29,6 @@
 		E45BE9810E8CC7DD009D7055 /* CoreServices.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = E45BE9770E8CC7DD009D7055 /* CoreServices.framework */; };
 		E45BE9830E8CC7DD009D7055 /* OpenGL.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = E45BE9790E8CC7DD009D7055 /* OpenGL.framework */; };
 		E45BE9840E8CC7DD009D7055 /* QuickTime.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = E45BE97A0E8CC7DD009D7055 /* QuickTime.framework */; };
-		E4B69E200A3A1BDC003C02F2 /* main.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E4B69E1D0A3A1BDC003C02F2 /* main.cpp */; };
 		E4C2424710CC5A17004149E2 /* AppKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = E4C2424410CC5A17004149E2 /* AppKit.framework */; };
 		E4C2424810CC5A17004149E2 /* Cocoa.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = E4C2424510CC5A17004149E2 /* Cocoa.framework */; };
 		E4C2424910CC5A17004149E2 /* IOKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = E4C2424610CC5A17004149E2 /* IOKit.framework */; };
@@ -63,17 +66,23 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
-		27D81DE0158D2B9C00A29153 /* testApp.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = testApp.cpp; path = src/testApp.cpp; sourceTree = SOURCE_ROOT; };
-		27D81DE1158D2B9C00A29153 /* testApp.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = testApp.h; path = src/testApp.h; sourceTree = SOURCE_ROOT; };
-		27D81DE9158D2BC300A29153 /* src_colors.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = src_colors.c; path = ../lib/src_colors.c; sourceTree = SOURCE_ROOT; };
-		27D81DEA158D2BC300A29153 /* svgtiny.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = svgtiny.c; path = ../lib/svgtiny.c; sourceTree = SOURCE_ROOT; };
-		27D81DEB158D2BC300A29153 /* svgtiny.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = svgtiny.h; path = ../lib/svgtiny.h; sourceTree = SOURCE_ROOT; };
-		27D81DEC158D2BC300A29153 /* svgtiny_gradient.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = svgtiny_gradient.c; path = ../lib/svgtiny_gradient.c; sourceTree = SOURCE_ROOT; };
-		27D81DED158D2BC300A29153 /* svgtiny_internal.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = svgtiny_internal.h; path = ../lib/svgtiny_internal.h; sourceTree = SOURCE_ROOT; };
-		27D81DEE158D2BC300A29153 /* svgtiny_list.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = svgtiny_list.c; path = ../lib/svgtiny_list.c; sourceTree = SOURCE_ROOT; };
-		27D81DF0158D2BC300A29153 /* ofxSVGTiny.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = ofxSVGTiny.cpp; path = ../src/ofxSVGTiny.cpp; sourceTree = SOURCE_ROOT; };
-		27D81DF1158D2BC300A29153 /* ofxSVGTiny.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = ofxSVGTiny.h; path = ../src/ofxSVGTiny.h; sourceTree = SOURCE_ROOT; };
-		27D81E31158D2C2400A29153 /* libxml2.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libxml2.dylib; path = /usr/lib/libxml2.dylib; sourceTree = "<absolute>"; };
+		27BC9C4A15930A3A004D7F68 /* main.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = main.cpp; path = src/main.cpp; sourceTree = SOURCE_ROOT; };
+		27BC9C4B15930A3A004D7F68 /* testApp.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = testApp.cpp; path = src/testApp.cpp; sourceTree = SOURCE_ROOT; };
+		27BC9C4C15930A3A004D7F68 /* testApp.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = testApp.h; path = src/testApp.h; sourceTree = SOURCE_ROOT; };
+		27C086E2159307220036906F /* ofxSVGTiny.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = ofxSVGTiny.cpp; path = ../../../addons/ofxSVGTiny/src/ofxSVGTiny.cpp; sourceTree = SOURCE_ROOT; };
+		27C086E3159307220036906F /* ofxSVGTiny.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = ofxSVGTiny.h; path = ../../../addons/ofxSVGTiny/src/ofxSVGTiny.h; sourceTree = SOURCE_ROOT; };
+		27C08740159307400036906F /* tinyxml.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = tinyxml.cpp; path = ../../../addons/ofxXmlSettings/libs/tinyxml.cpp; sourceTree = SOURCE_ROOT; };
+		27C08741159307400036906F /* tinyxml.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = tinyxml.h; path = ../../../addons/ofxXmlSettings/libs/tinyxml.h; sourceTree = SOURCE_ROOT; };
+		27C08742159307400036906F /* tinyxmlerror.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = tinyxmlerror.cpp; path = ../../../addons/ofxXmlSettings/libs/tinyxmlerror.cpp; sourceTree = SOURCE_ROOT; };
+		27C08743159307400036906F /* tinyxmlparser.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = tinyxmlparser.cpp; path = ../../../addons/ofxXmlSettings/libs/tinyxmlparser.cpp; sourceTree = SOURCE_ROOT; };
+		27C08745159307400036906F /* ofxXmlSettings.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = ofxXmlSettings.cpp; path = ../../../addons/ofxXmlSettings/src/ofxXmlSettings.cpp; sourceTree = SOURCE_ROOT; };
+		27C08746159307400036906F /* ofxXmlSettings.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = ofxXmlSettings.h; path = ../../../addons/ofxXmlSettings/src/ofxXmlSettings.h; sourceTree = SOURCE_ROOT; };
+		27C0875D159308320036906F /* src_colors.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = src_colors.cpp; path = ../../../addons/ofxSVGTiny/lib/src_colors.cpp; sourceTree = SOURCE_ROOT; };
+		27C0875E159308320036906F /* svgtiny_gradient.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = svgtiny_gradient.cpp; path = ../../../addons/ofxSVGTiny/lib/svgtiny_gradient.cpp; sourceTree = SOURCE_ROOT; };
+		27C0875F159308320036906F /* svgtiny_internal.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = svgtiny_internal.h; path = ../../../addons/ofxSVGTiny/lib/svgtiny_internal.h; sourceTree = SOURCE_ROOT; };
+		27C08760159308320036906F /* svgtiny_list.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = svgtiny_list.cpp; path = ../../../addons/ofxSVGTiny/lib/svgtiny_list.cpp; sourceTree = SOURCE_ROOT; };
+		27C08761159308320036906F /* svgtiny.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = svgtiny.cpp; path = ../../../addons/ofxSVGTiny/lib/svgtiny.cpp; sourceTree = SOURCE_ROOT; };
+		27C08762159308320036906F /* svgtiny.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = svgtiny.h; path = ../../../addons/ofxSVGTiny/lib/svgtiny.h; sourceTree = SOURCE_ROOT; };
 		BBAB23BE13894E4700AA2426 /* GLUT.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = GLUT.framework; path = ../../../libs/glut/lib/osx/GLUT.framework; sourceTree = "<group>"; };
 		E4328143138ABC890047C5CB /* openFrameworksLib.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = openFrameworksLib.xcodeproj; path = ../../../libs/openFrameworksCompiled/project/osx/openFrameworksLib.xcodeproj; sourceTree = SOURCE_ROOT; };
 		E45BE9710E8CC7DD009D7055 /* AGL.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AGL.framework; path = /System/Library/Frameworks/AGL.framework; sourceTree = "<absolute>"; };
@@ -86,7 +95,6 @@
 		E45BE9790E8CC7DD009D7055 /* OpenGL.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = OpenGL.framework; path = /System/Library/Frameworks/OpenGL.framework; sourceTree = "<absolute>"; };
 		E45BE97A0E8CC7DD009D7055 /* QuickTime.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = QuickTime.framework; path = /System/Library/Frameworks/QuickTime.framework; sourceTree = "<absolute>"; };
 		E4B69B5B0A3A1756003C02F2 /* ofAppDebug.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = ofAppDebug.app; sourceTree = BUILT_PRODUCTS_DIR; };
-		E4B69E1D0A3A1BDC003C02F2 /* main.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = main.cpp; path = src/main.cpp; sourceTree = SOURCE_ROOT; };
 		E4B6FCAD0C3E899E008CF71C /* openFrameworks-Info.plist */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = text.plist.xml; path = "openFrameworks-Info.plist"; sourceTree = "<group>"; };
 		E4C2424410CC5A17004149E2 /* AppKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AppKit.framework; path = /System/Library/Frameworks/AppKit.framework; sourceTree = "<absolute>"; };
 		E4C2424510CC5A17004149E2 /* Cocoa.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Cocoa.framework; path = /System/Library/Frameworks/Cocoa.framework; sourceTree = "<absolute>"; };
@@ -114,49 +122,81 @@
 				E4C2424710CC5A17004149E2 /* AppKit.framework in Frameworks */,
 				E4C2424810CC5A17004149E2 /* Cocoa.framework in Frameworks */,
 				E4C2424910CC5A17004149E2 /* IOKit.framework in Frameworks */,
-				27D81E32158D2C2400A29153 /* libxml2.dylib in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		27C086DA159307220036906F /* lib */ = {
+			isa = PBXGroup;
+			children = (
+				27C0875D159308320036906F /* src_colors.cpp */,
+				27C0875E159308320036906F /* svgtiny_gradient.cpp */,
+				27C0875F159308320036906F /* svgtiny_internal.h */,
+				27C08760159308320036906F /* svgtiny_list.cpp */,
+				27C08761159308320036906F /* svgtiny.cpp */,
+				27C08762159308320036906F /* svgtiny.h */,
+			);
+			name = lib;
+			path = ../../../addons/ofxSVGTiny/lib;
+			sourceTree = SOURCE_ROOT;
+		};
+		27C086E1159307220036906F /* src */ = {
+			isa = PBXGroup;
+			children = (
+				27C086E2159307220036906F /* ofxSVGTiny.cpp */,
+				27C086E3159307220036906F /* ofxSVGTiny.h */,
+			);
+			name = src;
+			path = ../../../addons/ofxSVGTiny/src;
+			sourceTree = SOURCE_ROOT;
+		};
+		27C0873E159307400036906F /* ofxXmlSettings */ = {
+			isa = PBXGroup;
+			children = (
+				27C0873F159307400036906F /* libs */,
+				27C08744159307400036906F /* src */,
+			);
+			name = ofxXmlSettings;
+			path = ../../../addons/ofxXmlSettings;
+			sourceTree = SOURCE_ROOT;
+		};
+		27C0873F159307400036906F /* libs */ = {
+			isa = PBXGroup;
+			children = (
+				27C08740159307400036906F /* tinyxml.cpp */,
+				27C08741159307400036906F /* tinyxml.h */,
+				27C08742159307400036906F /* tinyxmlerror.cpp */,
+				27C08743159307400036906F /* tinyxmlparser.cpp */,
+			);
+			name = libs;
+			path = ../../../addons/ofxXmlSettings/libs;
+			sourceTree = SOURCE_ROOT;
+		};
+		27C08744159307400036906F /* src */ = {
+			isa = PBXGroup;
+			children = (
+				27C08745159307400036906F /* ofxXmlSettings.cpp */,
+				27C08746159307400036906F /* ofxXmlSettings.h */,
+			);
+			name = src;
+			path = ../../../addons/ofxXmlSettings/src;
+			sourceTree = SOURCE_ROOT;
+		};
 		27D81DE6158D2BA400A29153 /* ofxSVGTiny */ = {
 			isa = PBXGroup;
 			children = (
-				27D81DE8158D2BC300A29153 /* lib */,
-				27D81DEF158D2BC300A29153 /* src */,
+				27C086DA159307220036906F /* lib */,
+				27C086E1159307220036906F /* src */,
 			);
 			name = ofxSVGTiny;
 			sourceTree = "<group>";
 		};
-		27D81DE8158D2BC300A29153 /* lib */ = {
-			isa = PBXGroup;
-			children = (
-				27D81DE9158D2BC300A29153 /* src_colors.c */,
-				27D81DEA158D2BC300A29153 /* svgtiny.c */,
-				27D81DEB158D2BC300A29153 /* svgtiny.h */,
-				27D81DEC158D2BC300A29153 /* svgtiny_gradient.c */,
-				27D81DED158D2BC300A29153 /* svgtiny_internal.h */,
-				27D81DEE158D2BC300A29153 /* svgtiny_list.c */,
-			);
-			name = lib;
-			path = ../lib;
-			sourceTree = SOURCE_ROOT;
-		};
-		27D81DEF158D2BC300A29153 /* src */ = {
-			isa = PBXGroup;
-			children = (
-				27D81DF0158D2BC300A29153 /* ofxSVGTiny.cpp */,
-				27D81DF1158D2BC300A29153 /* ofxSVGTiny.h */,
-			);
-			name = src;
-			path = ../src;
-			sourceTree = SOURCE_ROOT;
-		};
 		BB4B014C10F69532006C3DED /* addons */ = {
 			isa = PBXGroup;
 			children = (
+				27C0873E159307400036906F /* ofxXmlSettings */,
 				27D81DE6158D2BA400A29153 /* ofxSVGTiny */,
 			);
 			name = addons;
@@ -177,7 +217,6 @@
 				E45BE9770E8CC7DD009D7055 /* CoreServices.framework */,
 				E45BE9790E8CC7DD009D7055 /* OpenGL.framework */,
 				E45BE97A0E8CC7DD009D7055 /* QuickTime.framework */,
-				27D81E31158D2C2400A29153 /* libxml2.dylib */,
 			);
 			name = "system frameworks";
 			sourceTree = "<group>";
@@ -221,9 +260,9 @@
 		E4B69E1C0A3A1BDC003C02F2 /* src */ = {
 			isa = PBXGroup;
 			children = (
-				E4B69E1D0A3A1BDC003C02F2 /* main.cpp */,
-				27D81DE0158D2B9C00A29153 /* testApp.cpp */,
-				27D81DE1158D2B9C00A29153 /* testApp.h */,
+				27BC9C4A15930A3A004D7F68 /* main.cpp */,
+				27BC9C4B15930A3A004D7F68 /* testApp.cpp */,
+				27BC9C4C15930A3A004D7F68 /* testApp.h */,
 			);
 			path = src;
 			sourceTree = SOURCE_ROOT;
@@ -322,13 +361,17 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				E4B69E200A3A1BDC003C02F2 /* main.cpp in Sources */,
-				27D81DE2158D2B9C00A29153 /* testApp.cpp in Sources */,
-				27D81DF2158D2BC300A29153 /* src_colors.c in Sources */,
-				27D81DF3158D2BC300A29153 /* svgtiny.c in Sources */,
-				27D81DF4158D2BC300A29153 /* svgtiny_gradient.c in Sources */,
-				27D81DF5158D2BC300A29153 /* svgtiny_list.c in Sources */,
-				27D81DF6158D2BC300A29153 /* ofxSVGTiny.cpp in Sources */,
+				27C086E8159307220036906F /* ofxSVGTiny.cpp in Sources */,
+				27C08747159307400036906F /* tinyxml.cpp in Sources */,
+				27C08748159307400036906F /* tinyxmlerror.cpp in Sources */,
+				27C08749159307400036906F /* tinyxmlparser.cpp in Sources */,
+				27C0874A159307400036906F /* ofxXmlSettings.cpp in Sources */,
+				27C08763159308320036906F /* src_colors.cpp in Sources */,
+				27C08764159308320036906F /* svgtiny_gradient.cpp in Sources */,
+				27C08765159308320036906F /* svgtiny_list.cpp in Sources */,
+				27C08766159308320036906F /* svgtiny.cpp in Sources */,
+				27BC9C4D15930A3A004D7F68 /* main.cpp in Sources */,
+				27BC9C4E15930A3A004D7F68 /* testApp.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -363,10 +406,7 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = NO;
 				GCC_WARN_UNUSED_VALUE = NO;
 				GCC_WARN_UNUSED_VARIABLE = NO;
-				HEADER_SEARCH_PATHS = (
-					/opt/local/include/libxml2/,
-					"$(OF_CORE_HEADERS)",
-				);
+				HEADER_SEARCH_PATHS = "$(OF_CORE_HEADERS)";
 				OTHER_CPLUSPLUSFLAGS = (
 					"-D__MACOSX_CORE__",
 					"-lpthread",
@@ -396,10 +436,7 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = NO;
 				GCC_WARN_UNUSED_VALUE = NO;
 				GCC_WARN_UNUSED_VARIABLE = NO;
-				HEADER_SEARCH_PATHS = (
-					/opt/local/include/libxml2/,
-					"$(OF_CORE_HEADERS)",
-				);
+				HEADER_SEARCH_PATHS = "$(OF_CORE_HEADERS)";
 				OTHER_CPLUSPLUSFLAGS = (
 					"-D__MACOSX_CORE__",
 					"-lpthread",
