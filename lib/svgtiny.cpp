@@ -252,7 +252,7 @@ svgtiny_code svgtiny_parse_path(TiXmlElement *path,
 	//s = path_d = (char *) xmlGetProp(path, (const xmlChar *) "d");
     s = path_d = (char *) path->Attribute("d");
 	if (!s) {
-		//state.diagram->error_line = path->line;
+		//state.diagram->error_line = path->line; // todo: what was this doing?
 		state.diagram->error_message = "path: missing d attribute";
 		return svgtiny_SVG_ERROR;
 	}
@@ -450,6 +450,7 @@ svgtiny_code svgtiny_parse_path(TiXmlElement *path,
 		}
 	}
 
+	// no need to clear path_d with tinyxml
 	//xmlFree(path_d);
     if(path_d) {
         //delete path_d;
@@ -539,7 +540,7 @@ svgtiny_code svgtiny_parse_circle(TiXmlElement *circle,
 
 	if (r < 0) {
         // how to figure?
-		//state.diagram->error_line = circle->line;
+		//state.diagram->error_line = circle->line; // todo
         
 		state.diagram->error_message = "circle: r missing or negative";
 		return svgtiny_SVG_ERROR;
@@ -624,7 +625,7 @@ svgtiny_code svgtiny_parse_ellipse(TiXmlElement *ellipse,
 	svgtiny_parse_transform_attributes(ellipse, &state);
 
 	if (rx < 0 || ry < 0) {
-		//state.diagram->error_line = ellipse->line;
+		//state.diagram->error_line = ellipse->line; // todo
 		state.diagram->error_message = "ellipse: rx or ry missing "
 				"or negative";
 		return svgtiny_SVG_ERROR;
@@ -1073,6 +1074,7 @@ void svgtiny_parse_font_attributes(const TiXmlElement *node,
 
 	UNUSED(state);
 
+	// todo: add back in the font attribute parsing
 	//for (attr = node->properties; attr; attr = attr->next) {
         
 		/*if (strcmp((const char *) attr->Name(), "font-size") == 0) {
