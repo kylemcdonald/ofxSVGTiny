@@ -24,30 +24,30 @@
 
 #define KAPPA		0.5522847498
 
-static svgtiny_code svgtiny_parse_svg(TiXmlElement *svg,
+static svgtiny_code svgtiny_parse_svg(Poco::XML::Element *svg,
 		struct svgtiny_parse_state state);
-static svgtiny_code svgtiny_parse_path(TiXmlElement *path,
+static svgtiny_code svgtiny_parse_path(Poco::XML::Element *path,
 		struct svgtiny_parse_state state);
-static svgtiny_code svgtiny_parse_rect(TiXmlElement *rect,
+static svgtiny_code svgtiny_parse_rect(Poco::XML::Element *rect,
 		struct svgtiny_parse_state state);
-static svgtiny_code svgtiny_parse_circle(TiXmlElement *circle,
+static svgtiny_code svgtiny_parse_circle(Poco::XML::Element *circle,
 		struct svgtiny_parse_state state);
-static svgtiny_code svgtiny_parse_ellipse(TiXmlElement *ellipse,
+static svgtiny_code svgtiny_parse_ellipse(Poco::XML::Element *ellipse,
 		struct svgtiny_parse_state state);
-static svgtiny_code svgtiny_parse_line(TiXmlElement *line,
+static svgtiny_code svgtiny_parse_line(Poco::XML::Element *line,
 		struct svgtiny_parse_state state);
-static svgtiny_code svgtiny_parse_poly(TiXmlElement *poly,
+static svgtiny_code svgtiny_parse_poly(Poco::XML::Element *poly,
 		struct svgtiny_parse_state state, bool polygon);
-static svgtiny_code svgtiny_parse_text(TiXmlElement *text,
+static svgtiny_code svgtiny_parse_text(Poco::XML::Element *text,
 		struct svgtiny_parse_state state);
-static void svgtiny_parse_position_attributes(const TiXmlElement *node,
+static void svgtiny_parse_position_attributes(const Poco::XML::Element *node,
 		const struct svgtiny_parse_state state,
 		float *x, float *y, float *width, float *height);
-static void svgtiny_parse_paint_attributes(const TiXmlElement *node,
+static void svgtiny_parse_paint_attributes(const Poco::XML::Element *node,
 		struct svgtiny_parse_state *state);
-static void svgtiny_parse_font_attributes(const TiXmlElement *node,
+static void svgtiny_parse_font_attributes(const Poco::XML::Element *node,
 		struct svgtiny_parse_state *state);
-static void svgtiny_parse_transform_attributes(TiXmlElement *node,
+static void svgtiny_parse_transform_attributes(Poco::XML::Element *node,
 		struct svgtiny_parse_state *state);
 static svgtiny_code svgtiny_add_path(float *p, unsigned int n,
 		struct svgtiny_parse_state *state);
@@ -82,8 +82,10 @@ svgtiny_code svgtiny_parse(struct svgtiny_diagram *diagram,
 		const char *buffer, size_t size, const char *url,
 		int viewport_width, int viewport_height)
 {
-	TiXmlDocument document;
-	TiXmlElement *svg;
+	
+    Poco::XML::Document *document;
+	//Poco::XML::Element *svg;
+    Poco::XML::Element *svg;
 	struct svgtiny_parse_state state;
 	float x, y, width, height;
 	svgtiny_code code;
@@ -91,30 +93,24 @@ svgtiny_code svgtiny_parse(struct svgtiny_diagram *diagram,
 	assert(diagram);
 	assert(buffer);
 	assert(url);
-
-	/* parse XML to tree */
-	//document = xmlReadMemory(buffer, size, url, 0, XML_PARSE_NONET | XML_PARSE_COMPACT);
-    //const char* pBuf, size_t sz, TiXmlEncoding encoding)
-    document.ReadFromMemory(buffer, size);
-
-	//if (!document)
-	//	return svgtiny_LIBXML_ERROR;
-
-	/*xmlDebugDumpDocument(stderr, document);*/
-
-	/* find root <svg> element */
-	//svg = xmlDocGetRootElement(document);
     
-    svg = document.RootElement();
+    std::string str(buffer);
+    
+    Poco::XML::DOMParser parser;
+    document = parser.parseString(str);
+
+    svg = document->documentElement();
+    
+    std::cout << svg->localName() << std::endl;
     
 	if (!svg)
 		return svgtiny_NOT_SVG;
-	if (strcmp((const char *) svg->Value(), "svg") != 0)
+    if (svg->localName().compare("svg") != 0)
 		return svgtiny_NOT_SVG;
 
 	/* get graphic dimensions */
 	state.diagram = diagram;
-	state.document = &document;
+	state.document = document;
 	state.viewport_width = viewport_width;
 	state.viewport_height = viewport_height;
 	svgtiny_parse_position_attributes(svg, state, &x, &y, &width, &height);
@@ -151,33 +147,22 @@ svgtiny_code svgtiny_parse(struct svgtiny_diagram *diagram,
  * Parse a <svg> or <g> element node.
  */
 
-svgtiny_code svgtiny_parse_svg(TiXmlElement *svg,
+svgtiny_code svgtiny_parse_svg(Poco::XML::Element *svg,
 		struct svgtiny_parse_state state)
 {
 	float x, y, width, height;
-	TiXmlAttribute *view_box;
-	TiXmlElement *child;
+	Poco::XML::Attr *view_box;
+	Poco::XML::Element *child;
 
 	svgtiny_parse_position_attributes(svg, state, &x, &y, &width, &height);
 	svgtiny_parse_paint_attributes(svg, &state);
 	svgtiny_parse_font_attributes(svg, &state);
-
-	/* parse viewBox */
-	//view_box = xmlHasProp(svg, (const xmlChar *) "viewBox");
     
-    TiXmlAttribute *first = svg->FirstAttribute();
-    while(first->Next()) {
-        if(strcmp(first->Name(), "viewBox") == 0) {
-            view_box = first;
-            break;
-        } else {
-            first = first->Next();
-        }
-    }
+    view_box = svg->getAttributeNode("viewBox");
     
 	if (view_box) {
 		//const char *s = (const char *) view_box->children->content;
-        const char *s = (const char *) view_box->Value();
+        const char *s = (const char *) view_box->getValue().c_str();
 		float min_x, min_y, vwidth, vheight;
 		if (sscanf(s, "%f,%f,%f,%f",
 				&min_x, &min_y, &vwidth, &vheight) == 4 ||
@@ -192,13 +177,30 @@ svgtiny_code svgtiny_parse_svg(TiXmlElement *svg,
 
 	svgtiny_parse_transform_attributes(svg, &state);
 
-	//for (child = svg->children; child; child = child->next) {
-    for( child = (TiXmlElement*) svg->FirstChild(); child; child = (TiXmlElement*) child->NextSibling() ) {
+
+    // this is how this should work, but it doesn't
+    //Poco::XML::NodeIterator it(svg, Poco::XML::NodeFilter::SHOW_ELEMENT | Poco::XML::NodeFilter::SHOW_TEXT);
+    //Poco::XML::Node* pNode = it.nextNode();
+    //while (pNode)
+    
+    
+    // Note: this should be using the NodeIterator, but it doesn't seem to work as advertised when using
+    // a Node as the root for the iterator constructor. Really weird.
+    Poco::XML::ChildNodesList *cnl = ( Poco::XML::ChildNodesList *) svg->childNodes();
+    int i  = 0, l = cnl->length();
+    while( i < l )
+    {
+    
 		svgtiny_code code = svgtiny_OK;
+        
+        child = (Poco::XML::Element *) cnl->item(i);
+        
+        std::cout << child->localName() << std::endl;
 
         // I think this can't happen?
-		//if (child->type == XML_ELEMENT_NODE) {
-			const char *name = (const char *) child->Value();
+		if (child->nodeType() == Poco::XML::Element::ELEMENT_NODE) {
+			const char *name = (const char *) child->localName().c_str();
+            
 			if (strcmp(name, "svg") == 0)
 				code = svgtiny_parse_svg(child, state);
 			else if (strcmp(name, "g") == 0)
@@ -219,14 +221,24 @@ svgtiny_code svgtiny_parse_svg(TiXmlElement *svg,
 				code = svgtiny_parse_poly(child, state, false);
 			else if (strcmp(name, "polygon") == 0)
 				code = svgtiny_parse_poly(child, state, true);
-			else if (strcmp(name, "text") == 0)
+            else if (strcmp(name, "text") == 0)
 				code = svgtiny_parse_text(child, state);
-		//}
+            
+            // not sure about this
+        } else if (child->nodeType() == Poco::XML::Element::TEXT_NODE) {
+            
+            const char *name = (const char *) child->localName().c_str();
+            
+			if (strcmp(name, "text") == 0)
+				code = svgtiny_parse_text(child, state);
+		}
+        
+        //pNode = it.nextNode();
+        i++;
 
 		if (code != svgtiny_OK)
 			return code;
 	}
-
 	return svgtiny_OK;
 }
 
@@ -238,7 +250,7 @@ svgtiny_code svgtiny_parse_svg(TiXmlElement *svg,
  * http://www.w3.org/TR/SVG11/paths#PathElement
  */
 
-svgtiny_code svgtiny_parse_path(TiXmlElement *path,
+svgtiny_code svgtiny_parse_path(Poco::XML::Element *path,
 		struct svgtiny_parse_state state)
 {
 	char *s, *path_d;
@@ -253,7 +265,8 @@ svgtiny_code svgtiny_parse_path(TiXmlElement *path,
 
 	/* read d attribute */
 	//s = path_d = (char *) xmlGetProp(path, (const xmlChar *) "d");
-    s = path_d = (char *) path->Attribute("d");
+    //s = path_d = (char *) path->Attribute("d");
+    s = path_d = (char *) path->getAttribute("d").c_str();
 	if (!s) {
 		//state.diagram->error_line = path->line;
 		state.diagram->error_message = "path: missing d attribute";
@@ -474,7 +487,7 @@ svgtiny_code svgtiny_parse_path(TiXmlElement *path,
  * http://www.w3.org/TR/SVG11/shapes#RectElement
  */
 
-svgtiny_code svgtiny_parse_rect(TiXmlElement *rect,
+svgtiny_code svgtiny_parse_rect(Poco::XML::Element *rect,
 		struct svgtiny_parse_state state)
 {
 	float x, y, width, height;
@@ -511,21 +524,28 @@ svgtiny_code svgtiny_parse_rect(TiXmlElement *rect,
  * Parse a <circle> element node.
  */
 
-svgtiny_code svgtiny_parse_circle(TiXmlElement *circle,
+svgtiny_code svgtiny_parse_circle(Poco::XML::Element *circle,
 		struct svgtiny_parse_state state)
 {
 	float x = 0, y = 0, r = -1;
 	float *p;
 	//xmlAttr *attr;
-    TiXmlAttribute *attr;
+    Poco::XML::Attr *attr;
 
 	//for (attr = circle->properties; attr; attr = attr->next) {
-    for( attr = circle->FirstAttribute(); attr; attr = attr->Next() ) {
+    //for( attr = circle->FirstAttribute(); attr; attr = attr->Next() ) {
+    
+    Poco::XML::NamedNodeMap *map = circle->attributes();
+    for( int i = 0; i < map->length(); i++ ) {
+    
 		//const char *name = (const char *) attr->name;
 		//const char *content = (const char *) attr->children->content;
         
-        const char *name = (const char *) attr->Name();
-		const char *content = (const char *) attr->Value();
+        //const char *name = (const char *) attr->Name();
+		//const char *content = (const char *) attr->Value();
+        
+        const char *name = (const char *) map->item(i)->localName().c_str();
+		const char *content = (const char *) map->item(i)->getNodeValue().c_str();
         
 		if (strcmp(name, "cx") == 0)
 			x = svgtiny_parse_length(content,
@@ -595,20 +615,27 @@ svgtiny_code svgtiny_parse_circle(TiXmlElement *circle,
  * Parse an <ellipse> element node.
  */
 
-svgtiny_code svgtiny_parse_ellipse(TiXmlElement *ellipse,
+svgtiny_code svgtiny_parse_ellipse(Poco::XML::Element *ellipse,
 		struct svgtiny_parse_state state)
 {
 	float x = 0, y = 0, rx = -1, ry = -1;
 	float *p;
-	TiXmlAttribute *attr;
+	Poco::XML::Attr *attr;
 
 	//for (attr = ellipse->properties; attr; attr = attr->next) {
-    for( attr = ellipse->FirstAttribute(); attr; attr = attr->Next() ) {
+    //for( attr = ellipse->FirstAttribute(); attr; attr = attr->Next() ) {
+    
+    Poco::XML::NamedNodeMap *map = ellipse->attributes();
+    for( int i = 0; i < map->length(); i++ ) {
+    
 		//const char *name = (const char *) attr->name;
 		//const char *content = (const char *) attr->children->content;
         
-        const char *name = (const char *) attr->Name();
-		const char *content = (const char *) attr->Value();
+        //const char *name = (const char *) attr->Name();
+		//const char *content = (const char *) attr->Value();
+        
+        const char *name = (const char *) map->item(i)->localName().c_str();
+		const char *content = (const char *) map->item(i)->getNodeValue().c_str();
         
 		if (strcmp(name, "cx") == 0)
 			x = svgtiny_parse_length(content,
@@ -680,21 +707,28 @@ svgtiny_code svgtiny_parse_ellipse(TiXmlElement *ellipse,
  * Parse a <line> element node.
  */
 
-svgtiny_code svgtiny_parse_line(TiXmlElement *line,
+svgtiny_code svgtiny_parse_line(Poco::XML::Element *line,
 		struct svgtiny_parse_state state)
 {
 	float x1 = 0, y1 = 0, x2 = 0, y2 = 0;
 	float *p;
 	//xmlAttr *attr;
-    TiXmlAttribute *attr;
+    Poco::XML::Attr *attr;
 
 	//for (attr = line->properties; attr; attr = attr->next) {
-    for( attr = line->FirstAttribute(); attr; attr = attr->Next() ) {
+    //for( attr = line->FirstAttribute(); attr; attr = attr->Next() ) {
+    
+    Poco::XML::NamedNodeMap *map = line->attributes();
+    for( int i = 0; i < map->length(); i++ ) {
+    
 		//const char *name = (const char *) attr->name;
 		//const char *content = (const char *) attr->children->content;
         
-        const char *name = (const char *) attr->Name();
-		const char *content = (const char *) attr->Value();
+        //const char *name = (const char *) attr->Name();
+		//const char *content = (const char *) attr->Value();
+        
+        const char *name = (const char *) map->item(i)->localName().c_str();
+		const char *content = (const char *) map->item(i)->getNodeValue().c_str();
         
 		if (strcmp(name, "x1") == 0)
 			x1 = svgtiny_parse_length(content,
@@ -735,7 +769,7 @@ svgtiny_code svgtiny_parse_line(TiXmlElement *line,
  * http://www.w3.org/TR/SVG11/shapes#PolygonElement
  */
 
-svgtiny_code svgtiny_parse_poly(TiXmlElement *poly,
+svgtiny_code svgtiny_parse_poly(Poco::XML::Element *poly,
 		struct svgtiny_parse_state state, bool polygon)
 {
 	char *s, *points;
@@ -748,7 +782,7 @@ svgtiny_code svgtiny_parse_poly(TiXmlElement *poly,
 	/* read points attribute */
 	//s = points = (char *) xmlGetProp(poly, (const xmlChar *) "points");
     
-    s = points = (char *) poly->Attribute("points");
+    s = points = (char *) poly->getAttribute("points").c_str();
     
 	if (!s) {
 		//state.diagram->error_line = poly->line;
@@ -800,12 +834,12 @@ svgtiny_code svgtiny_parse_poly(TiXmlElement *poly,
  * Parse a <text> or <tspan> element node.
  */
 
-svgtiny_code svgtiny_parse_text(TiXmlElement *text,
+svgtiny_code svgtiny_parse_text(Poco::XML::Element *text,
 		struct svgtiny_parse_state state)
 {
 	float x, y, width, height;
 	float px, py;
-	TiXmlElement *child;
+	Poco::XML::Element *child;
 
 	svgtiny_parse_position_attributes(text, state,
 			&x, &y, &width, &height);
@@ -822,11 +856,16 @@ svgtiny_code svgtiny_parse_text(TiXmlElement *text,
 	style.font_size.value.length.value *= state.ctm.a;*/
 
 	//for (child = text->children; child; child = child->next) {
-    for( child = (TiXmlElement*) text->FirstChild( false ); child; child = (TiXmlElement*) child->NextSibling( false ) ) {
+    //for( child = (Poco::XML::Element*) text->FirstChild( false ); child; child = (Poco::XML::Element*) child->NextSibling( false ) ) {
+    
+    
+    Poco::XML::NodeIterator it(text, Poco::XML::NodeFilter::SHOW_ELEMENT | Poco::XML::NodeFilter::SHOW_TEXT);
+    Poco::XML::Node* pNode = it.nextNode();
+    while (pNode) {
     
 		svgtiny_code code = svgtiny_OK;
 
-		if (strcmp(child->Value(), "text") == 0) 
+		if (pNode->getNodeValue().compare("text") == 0) 
         {
 			struct svgtiny_shape *shape = svgtiny_add_shape(&state);
 			
@@ -835,17 +874,20 @@ svgtiny_code svgtiny_parse_text(TiXmlElement *text,
             
 			//shape->text = strdup((const char *) child->content);
             
-            shape->text = strdup((const char *) child->Value());
+            shape->text = strdup((const char *) pNode->getNodeValue().c_str());
             
 			shape->text_x = px;
 			shape->text_y = py;
 			state.diagram->shape_count++;
 
 		} 
-        else if (strcmp((const char *) child->Value(), "tspan") == 0) 
+        //else if (strcmp((const char *) child->Value(), "tspan") == 0) 
+        else if (pNode->getNodeValue().compare("tspan") == 0) 
         {
 			code = svgtiny_parse_text(child, state);
 		}
+    
+        pNode = it.nextNode();
 
 		if (!code != svgtiny_OK)
 			return code;
@@ -859,12 +901,12 @@ svgtiny_code svgtiny_parse_text(TiXmlElement *text,
  * Parse x, y, width, and height attributes, if present.
  */
 
-void svgtiny_parse_position_attributes(const TiXmlElement *node,
+void svgtiny_parse_position_attributes(const Poco::XML::Element *node,
 		const struct svgtiny_parse_state state,
 		float *x, float *y, float *width, float *height)
 {
 	//xmlAttr *attr;
-    const TiXmlAttribute *attr;
+    const Poco::XML::Attr *attr;
 
 	*x = 0;
 	*y = 0;
@@ -872,13 +914,18 @@ void svgtiny_parse_position_attributes(const TiXmlElement *node,
 	*height = state.viewport_height;
 
 	//for (attr = node->properties; attr; attr = attr->next) {
-    for( attr = node->FirstAttribute(); attr; attr = attr->Next() ) {
+    //for( attr = node->FirstAttribute(); attr; attr = attr->Next() ) {
+    Poco::XML::NamedNodeMap *map = node->attributes();
+    //for( attr = node->FirstAttribute(); attr; attr = attr->Next() ) {
+    for( int i = 0; i < map->length(); i++ ) {
+    
     
 		//const char *name = (const char *) attr->name;
 		//const char *content = (const char *) attr->children->content;
         
-        const char *name = (const char *) attr->Name();
-		const char *content = (const char *) attr->Value();
+        // good god this is ugly
+        const char *name = (const char *) map->item(i)->localName().c_str();
+		const char *content = (const char *) map->item(i)->getNodeValue().c_str();
         
 		if (strcmp(name, "x") == 0)
 			*x = svgtiny_parse_length(content,
@@ -940,21 +987,26 @@ float svgtiny_parse_length(const char *s, int viewport_size,
  * Parse paint attributes, if present.
  */
 
-void svgtiny_parse_paint_attributes(const TiXmlElement *node,
+void svgtiny_parse_paint_attributes(const Poco::XML::Element *node,
 		struct svgtiny_parse_state *state)
 {
 	//const xmlAttr *attr;
-    const TiXmlAttribute *attr;
+    const Poco::XML::Attr *attr;
 
 	//for (attr = node->properties; attr; attr = attr->next) {
     
-    for( attr = node->FirstAttribute(); attr; attr = attr->Next() ) {
+    //for( attr = node->FirstAttribute(); attr; attr = attr->Next() ) {
+    Poco::XML::NamedNodeMap *map = node->attributes();
+    for( int i = 0; i < map->length(); i++ ) {
     
 		//const char *name = (const char *) attr->name;
 		//const char *content = (const char *) attr->children->content;
         
-        const char *name = (const char *) attr->Name();
-		const char *content = (const char *) attr->Value();
+        //const char *name = (const char *) attr->Name();
+		//const char *content = (const char *) attr->Value();
+        
+        const char *name = (const char *) map->item(i)->localName().c_str();
+		const char *content = (const char *) map->item(i)->getNodeValue().c_str();
         
 		if (strcmp(name, "fill") == 0)
 			svgtiny_parse_color(content, &state->fill, state);
@@ -966,7 +1018,7 @@ void svgtiny_parse_paint_attributes(const TiXmlElement *node,
 		else if (strcmp(name, "style") == 0) {
 			//const char *style = (const char *) attr->children->content;
             
-            const char *style = attr->Value();
+            const char *style = attr->getValue().c_str();
             
 			const char *s;
 			char *value;
@@ -1068,11 +1120,11 @@ void svgtiny_parse_color(const char *s, svgtiny_colour *c,
  * Parse font attributes, if present.
  */
 
-void svgtiny_parse_font_attributes(const TiXmlElement *node,
+void svgtiny_parse_font_attributes(const Poco::XML::Element *node,
 		struct svgtiny_parse_state *state)
 {
 	//const xmlAttr *attr;
-    const TiXmlAttribute *attr;
+    const Poco::XML::Attr *attr;
 
 	UNUSED(state);
 
@@ -1106,7 +1158,7 @@ void svgtiny_parse_font_attributes(const TiXmlElement *node,
  * http://www.w3.org/TR/SVG11/coords#TransformAttribute
  */
 
-void svgtiny_parse_transform_attributes(TiXmlElement *node,
+void svgtiny_parse_transform_attributes(Poco::XML::Element *node,
 		struct svgtiny_parse_state *state)
 {
 	char *transform;
@@ -1114,7 +1166,7 @@ void svgtiny_parse_transform_attributes(TiXmlElement *node,
 	/* parse transform */
 	//transform = (char *) xmlGetProp(node, (const xmlChar *) "transform");
     
-    transform = (char *) node->FirstChild("transform");
+    transform = (char *) node->getChildElement("transform");
     
 	if (transform) {
 		svgtiny_parse_transform(transform, &state->ctm.a, &state->ctm.b,

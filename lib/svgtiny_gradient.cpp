@@ -13,7 +13,7 @@
 
 #undef GRADIENT_DEBUG
 
-static svgtiny_code svgtiny_parse_linear_gradient(TiXmlElement *linear,
+static svgtiny_code svgtiny_parse_linear_gradient(Poco::XML::Element *linear,
 		struct svgtiny_parse_state *state);
 static float svgtiny_parse_gradient_offset(const char *s);
 static void svgtiny_path_bbox(float *p, unsigned int n,
@@ -27,7 +27,7 @@ static void svgtiny_invert_matrix(float *m, float *inv);
 
 void svgtiny_find_gradient(const char *id, struct svgtiny_parse_state *state)
 {
-	TiXmlElement *gradient;
+	Poco::XML::Element *gradient;
 
 	fprintf(stderr, "svgtiny_find_gradient: id \"%s\"\n", id);
 
@@ -44,17 +44,22 @@ void svgtiny_find_gradient(const char *id, struct svgtiny_parse_state *state)
 	state->gradient_transform.e = 0;
 	state->gradient_transform.f = 0;
 
-    TiXmlDocument *d = state->document;
+    Poco::XML::Document *d = state->document;
     
-	gradient = svgtiny_find_element_by_id( d->RootElement(), id);
-	fprintf(stderr, "gradient %p\n", (void *) gradient);
+	//gradient = svgtiny_find_element_by_id( d->documentElement(), id);
+    
+    std::string s(id);
+    gradient = d->getElementById(s);
+    
+	//fprintf(stderr, "gradient %p\n", (void *) gradient);
 	if (!gradient) {
 		fprintf(stderr, "gradient \"%s\" not found\n", id);
 		return;
 	}
 
-	fprintf(stderr, "gradient name \"%s\"\n", gradient->Value());
-	if (strcmp((const char *) gradient->Value(), "linearGradient") == 0) {
+	//fprintf(stderr, "gradient name \"%s\"\n", gradient->Value());
+	//if (strcmp((const char *) gradient->Value(), "linearGradient") == 0) {
+    if (gradient->localName().compare("linearGradient") == 0) {
 		svgtiny_parse_linear_gradient(gradient, state);
 	}
 }
@@ -66,33 +71,44 @@ void svgtiny_find_gradient(const char *id, struct svgtiny_parse_state *state)
  * http://www.w3.org/TR/SVG11/pservers#LinearGradients
  */
 
-svgtiny_code svgtiny_parse_linear_gradient(TiXmlElement *linear,
+svgtiny_code svgtiny_parse_linear_gradient(Poco::XML::Element *linear,
 		struct svgtiny_parse_state *state)
 {
 	unsigned int i = 0;
-	TiXmlElement *stop;
-	TiXmlAttribute *attr;
-	//TiXmlAttribute *href = xmlHasProp(linear, (const xmlChar *) "href");
+    
+	Poco::XML::Element *stop;
+	Poco::XML::Attr *attr;
+	//Poco::XML::Attribute *href = xmlHasProp(linear, (const xmlChar *) "href");
 	//if (href && href->children->content[0] == '#')
 	//	svgtiny_find_gradient((const char *) href->children->content
 	//			+ 1, state);
     
     
-    TiXmlElement *href = (TiXmlElement *) linear->FirstChild("href");
-    if (href && href->Value()[0] == '#') {
-        svgtiny_find_gradient((const char *) &href->Value()[0], state);
+    //Poco::XML::Element *href = (Poco::XML::Element *) linear->FirstChild("href");
+    Poco::XML::Element *href = linear->getChildElement("href");
+    if (href && href->nodeValue()[0] == '#') {
+        svgtiny_find_gradient((const char *) &href->nodeValue().c_str()[0], state);
     }
     
 
 	//for (attr = linear->properties; attr; attr = attr->next) {
     
-    for( attr = linear->FirstAttribute(); attr; attr = attr->Next() ) {
+    //for( attr = linear->FirstAttribute(); attr; attr = attr->Next() ) {
+    
+    
+    Poco::XML::NodeIterator it(linear, Poco::XML::NodeFilter::SHOW_ELEMENT | Poco::XML::NodeFilter::SHOW_TEXT);
+    Poco::XML::Node* pNode = it.nextNode();
+    while (pNode)
+    {
     
 		//const char *name = (const char *) attr->name;
 		//const char *content = (const char *) attr->children->content;
         
-        const char *name = (const char *) attr->Name();
-		const char *content = (const char *) attr->Value();
+        //const char *name = (const char *) attr->Name();
+		//const char *content = (const char *) attr->Value();
+        
+        const char *name = (const char *) pNode->localName().c_str();
+		const char *content = (const char *) pNode->getNodeValue().c_str();
         
 		if (strcmp(name, "x1") == 0)
 			state->gradient_x1 = content;
@@ -121,10 +137,19 @@ svgtiny_code svgtiny_parse_linear_gradient(TiXmlElement *linear,
 			state->gradient_transform.e = e;
 			state->gradient_transform.f = f;
 		}
-        }
+        
+        
+        pNode = it.nextNode();
+    }
 
 	//for (stop = linear->children; stop; stop = stop->next) {
-    for( stop = (TiXmlElement*) linear->FirstChild( false ); stop; stop = (TiXmlElement*) stop->NextSibling( false ) ) {
+    //for( stop = (Poco::XML::Element*) linear->FirstChild( false ); stop; stop = (Poco::XML::Element*) stop->NextSibling( false ) ) {
+    
+    Poco::XML::NodeIterator it2(linear, Poco::XML::NodeFilter::SHOW_ELEMENT | Poco::XML::NodeFilter::SHOW_TEXT);
+    pNode = it2.nextNode();
+    while (pNode)
+    {
+    
     
 		float offset = -1;
 		svgtiny_colour color = svgtiny_TRANSPARENT;
@@ -132,20 +157,27 @@ svgtiny_code svgtiny_parse_linear_gradient(TiXmlElement *linear,
 		//if (stop->type != XML_ELEMENT_NODE)
 		//	continue;
         
-		if (strcmp((const char *) stop->Value(), "stop") != 0)
+		if (pNode->localName().compare("stop") != 0)
 			continue;
 
 		//for (attr = stop->properties; attr;
 		//		attr = attr->next) {
         
-        for( attr = stop->FirstAttribute(); attr; attr = attr->Next() ) {
+        //for( attr = stop->FirstAttribute(); attr; attr = attr->Next() ) {
+        
+        Poco::XML::NamedNodeMap *map = pNode->attributes();
+        for( i = 0; i < map->length(); i++ ) {
+        
         
 			//const char *name = (const char *) attr->name;
 			//const char *content =
 			//		(const char *) attr->children->content;
             
-            const char *name = (const char *) attr->Name();
-            const char *content = (const char *) attr->Value();
+            //const char *name = (const char *) attr->Name();
+            //const char *content = (const char *) attr->Value();
+            
+            const char *name = (const char *) map->item(i)->localName().c_str();
+            const char *content = (const char *) map->item(i)->getNodeValue().c_str();
             
 			if (strcmp(name, "offset") == 0)
 				offset = svgtiny_parse_gradient_offset(content);
@@ -172,6 +204,8 @@ svgtiny_code svgtiny_parse_linear_gradient(TiXmlElement *linear,
 			state->gradient_stop[i].color = color;
 			i++;
 		}
+        
+        pNode = it.nextNode();
 
 		if (i == svgtiny_MAX_STOPS)
 			break;
@@ -668,19 +702,21 @@ void svgtiny_invert_matrix(float *m, float *inv)
 }
 
 
+
+// don't need this any more since Poco XML provides that
 /**
  * Find an element in the document by id.
  */
-
-TiXmlElement *svgtiny_find_element_by_id(TiXmlElement *node, const char *id)
+/*
+Poco::XML::Element *svgtiny_find_element_by_id(Poco::XML::Element *node, const char *id)
 {
-	TiXmlNode *child;
-	TiXmlElement *found;
+	Poco::XML::Element *child;
+	Poco::XML::Element *found;
 
 	//for (child = node->children; child; child = child->next) {
     for( child = node->FirstChild( false ); child; child = child->NextSibling( false ) ) {
     
-		TiXmlAttribute *attr;
+		Poco::XML::Attr *attr;
 		//if (child->type != XML_ELEMENT_NODE)
 		//	continue;
         
@@ -705,4 +741,5 @@ TiXmlElement *svgtiny_find_element_by_id(TiXmlElement *node, const char *id)
 
 	return 0;
 }
+ */
 
