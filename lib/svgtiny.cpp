@@ -251,6 +251,8 @@ svgtiny_code svgtiny_parse_path(TiXmlElement *path,
 	/* read d attribute */
 	//s = path_d = (char *) xmlGetProp(path, (const xmlChar *) "d");
     s = path_d = (char *) path->Attribute("d");
+	char* send = s + strlen(s);
+	std::cout << "parsing '" << s << "'" << std::endl;
 	if (!s) {
 		//state.diagram->error_line = path->line; // todo: what was this doing?
 		state.diagram->error_message = "path: missing d attribute";
@@ -267,7 +269,7 @@ svgtiny_code svgtiny_parse_path(TiXmlElement *path,
 		if (s[i] == ',')
 			s[i] = ' ';
 	i = 0;
-	while (*s) {
+	while (s < send) {
 		char command[2];
 		int plot_command;
 		float x, y, x1, y1, x2, y2, rx, ry, rotation, large_arc, sweep;
