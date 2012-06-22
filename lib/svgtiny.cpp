@@ -14,7 +14,6 @@
 #include <string.h>
 //#include <libxml/parser.h>
 //#include <libxml/debugXML.h>
-#include "/Users/joshua.noble/code/OF/0071_osx/addons/ofxXmlSettings/libs/tinyxml.h"
 #include "svgtiny.h"
 #include "svgtiny_internal.h"
 
