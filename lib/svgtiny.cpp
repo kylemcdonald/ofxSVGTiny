@@ -17,6 +17,8 @@
 #include "svgtiny.h"
 #include "svgtiny_internal.h"
 
+using namespace std;
+
 #ifdef _MSC_VER
 long lroundf (float x) {
 	long xl = (long) x;
@@ -169,9 +171,9 @@ svgtiny_code svgtiny_parse_svg(Poco::XML::Element *svg,
 		//const char *s = (const char *) view_box->children->content;
         const char *s = (const char *) view_box->getValue().c_str();
 		float min_x, min_y, vwidth, vheight;
-		if (sscanf(s, "%f,%f,%f,%f",
+		if (sscanf(s, " %f,%f,%f,%f",
 				&min_x, &min_y, &vwidth, &vheight) == 4 ||
-				sscanf(s, "%f %f %f %f",
+				sscanf(s, " %f %f %f %f",
 				&min_x, &min_y, &vwidth, &vheight) == 4) {
 			state.ctm.a = (float) state.viewport_width / vwidth;
 			state.ctm.d = (float) state.viewport_height / vheight;
@@ -269,7 +271,8 @@ svgtiny_code svgtiny_parse_path(Poco::XML::Element *path,
 	/* read d attribute */
 	//s = path_d = (char *) xmlGetProp(path, (const xmlChar *) "d");
     //s = path_d = (char *) path->Attribute("d");
-	s = path_d = (char *) path->getAttribute("d").c_str();
+	const Poco::XML::XMLString& attrString = path->getAttribute("d");
+	s = path_d = (char *) attrString.c_str();
 	char* send = s + strlen(s);
 	if (!s) {
 		//state.diagram->error_line = path->line; // todo: what was this doing?
@@ -294,7 +297,7 @@ svgtiny_code svgtiny_parse_path(Poco::XML::Element *path,
 		int n;
 
 		/* moveto (M, m), lineto (L, l) (2 arguments) */
-		if (sscanf(s, " %1[MmLl] %f %f %n", command, &x, &y, &n) == 3) {
+		if (sscanf(s, " %1[MmLl] %f %f%n", command, &x, &y, &n) == 3) {
 			/*LOG(("moveto or lineto"));*/
 			if (*command == 'M' || *command == 'm')
 				plot_command = svgtiny_PATH_MOVE;
@@ -312,16 +315,16 @@ svgtiny_code svgtiny_parse_path(Poco::XML::Element *path,
 						= y;
 				s += n;
 				plot_command = svgtiny_PATH_LINE;
-			} while (sscanf(s, "%f %f %n", &x, &y, &n) == 2);
+			} while (sscanf(s, " %f %f%n", &x, &y, &n) == 2);
 
 		/* closepath (Z, z) (no arguments) */
-		} else if (sscanf(s, " %1[Zz] %n", command, &n) == 1) {
+		} else if (sscanf(s, " %1[Zz]%n", command, &n) == 1) {
 			/*LOG(("closepath"));*/
 			p[i++] = svgtiny_PATH_CLOSE;
 			s += n;
 
 		/* horizontal lineto (H, h) (1 argument) */
-		} else if (sscanf(s, " %1[Hh] %f %n", command, &x, &n) == 2) {
+		} else if (sscanf(s, " %1[Hh] %f%n", command, &x, &n) == 2) {
 			/*LOG(("horizontal lineto"));*/
 			do {
 				p[i++] = svgtiny_PATH_LINE;
@@ -331,10 +334,10 @@ svgtiny_code svgtiny_parse_path(Poco::XML::Element *path,
 						= x;
 				p[i++] = last_cubic_y = last_quad_y = last_y;
 				s += n;
-			} while (sscanf(s, "%f %n", &x, &n) == 1);
+			} while (sscanf(s, " %f%n", &x, &n) == 1);
 
 		/* vertical lineto (V, v) (1 argument) */
-		} else if (sscanf(s, " %1[Vv] %f %n", command, &y, &n) == 2) {
+		} else if (sscanf(s, " %1[Vv] %f%n", command, &y, &n) == 2) {
 			/*LOG(("vertical lineto"));*/
 			do {
 				p[i++] = svgtiny_PATH_LINE;
@@ -344,10 +347,10 @@ svgtiny_code svgtiny_parse_path(Poco::XML::Element *path,
 				p[i++] = last_cubic_y = last_quad_y = last_y
 						= y;
 				s += n;
-			} while (sscanf(s, "%f %n", &x, &n) == 1);
+			} while (sscanf(s, " %f%n", &x, &n) == 1);
 
 		/* curveto (C, c) (6 arguments) */
-		} else if (sscanf(s, " %1[Cc] %f %f %f %f %f %f %n", command,
+		} else if (sscanf(s, " %1[Cc] %f %f %f %f %f %f%n", command,
 				&x1, &y1, &x2, &y2, &x, &y, &n) == 7) {
 			/*LOG(("curveto"));*/
 			do {
@@ -367,11 +370,11 @@ svgtiny_code svgtiny_parse_path(Poco::XML::Element *path,
 				p[i++] = last_quad_x = last_x = x;
 				p[i++] = last_quad_y = last_y = y;
 				s += n;
-			} while (sscanf(s, "%f %f %f %f %f %f %n",
+			} while (sscanf(s, " %f %f %f %f %f %f%n",
 					&x1, &y1, &x2, &y2, &x, &y, &n) == 6);
 
 		/* shorthand/smooth curveto (S, s) (4 arguments) */
-		} else if (sscanf(s, " %1[Ss] %f %f %f %f %n", command,
+		} else if (sscanf(s, " %1[Ss] %f %f %f %f%n", command,
 				&x2, &y2, &x, &y, &n) == 5) {
 			/*LOG(("shorthand/smooth curveto"));*/
 			do {
@@ -391,11 +394,11 @@ svgtiny_code svgtiny_parse_path(Poco::XML::Element *path,
 				p[i++] = last_quad_x = last_x = x;
 				p[i++] = last_quad_y = last_y = y;
 				s += n;
-			} while (sscanf(s, "%f %f %f %f %n",
+			} while (sscanf(s, " %f %f %f %f%n",
 					&x2, &y2, &x, &y, &n) == 4);
 
 		/* quadratic Bezier curveto (Q, q) (4 arguments) */
-		} else if (sscanf(s, " %1[Qq] %f %f %f %f %n", command,
+		} else if (sscanf(s, " %1[Qq] %f %f %f %f%n", command,
 				&x1, &y1, &x, &y, &n) == 5) {
 			/*LOG(("quadratic Bezier curveto"));*/
 			do {
@@ -415,12 +418,12 @@ svgtiny_code svgtiny_parse_path(Poco::XML::Element *path,
 				p[i++] = last_cubic_x = last_x = x;
 				p[i++] = last_cubic_y = last_y = y;
 				s += n;
-			} while (sscanf(s, "%f %f %f %f %n",
+			} while (sscanf(s, " %f %f %f %f%n",
 					&x1, &y1, &x, &y, &n) == 4);
 
 		/* shorthand/smooth quadratic Bezier curveto (T, t)
 		   (2 arguments) */
-		} else if (sscanf(s, " %1[Tt] %f %f %n", command,
+		} else if (sscanf(s, " %1[Tt] %f %f%n", command,
 				&x, &y, &n) == 3) {
 			/*LOG(("shorthand/smooth quadratic Bezier curveto"));*/
 			do {
@@ -442,11 +445,11 @@ svgtiny_code svgtiny_parse_path(Poco::XML::Element *path,
 				p[i++] = last_cubic_x = last_x = x;
 				p[i++] = last_cubic_y = last_y = y;
 				s += n;
-			} while (sscanf(s, "%f %f %n",
+			} while (sscanf(s, " %f %f%n",
 					&x, &y, &n) == 2);
 
 		/* elliptical arc (A, a) (7 arguments) */
-		} else if (sscanf(s, " %1[Aa] %f %f %f %f %f %f %f %n", command,
+		} else if (sscanf(s, " %1[Aa] %f %f %f %f %f %f %f%n", command,
 				&rx, &ry, &rotation, &large_arc, &sweep,
 				&x, &y, &n) == 8) {
 			do {
@@ -460,12 +463,14 @@ svgtiny_code svgtiny_parse_path(Poco::XML::Element *path,
 				p[i++] = last_cubic_y = last_quad_y = last_y
 						= y;
 				s += n;
-			} while (sscanf(s, "%f %f %f %f %f %f %f %n",
+			} while (sscanf(s, " %f %f %f %f %f %f %f%n",
 				&rx, &ry, &rotation, &large_arc, &sweep,
 				&x, &y, &n) == 7);
 
 		} else {
 			fprintf(stderr, "parse failed at \"%s\"\n", s);
+			cout << "error at character " << (int) (send - s) << endl;
+			cout << attrString << endl;
 			break;
 		}
 	}
@@ -813,7 +818,7 @@ svgtiny_code svgtiny_parse_poly(Poco::XML::Element *poly,
 		float x, y;
 		int n;
 
-		if (sscanf(s, "%f %f %n", &x, &y, &n) == 2) {
+		if (sscanf(s, " %f %f%n", &x, &y, &n) == 2) {
 			if (i == 0)
 				p[i++] = svgtiny_PATH_MOVE;
 			else
@@ -1205,22 +1210,22 @@ void svgtiny_parse_transform(char *s, float *ma, float *mb,
 		a = d = 1;
 		b = c = 0;
 		e = f = 0;
-		if (sscanf(s, "matrix (%f %f %f %f %f %f) %n",
+		if (sscanf(s, " matrix (%f %f %f %f %f %f)%n",
 					&a, &b, &c, &d, &e, &f, &n) == 6)
 			;
-		else if (sscanf(s, "translate (%f %f) %n",
+		else if (sscanf(s, " translate (%f %f)%n",
 					&e, &f, &n) == 2)
 			;
-		else if (sscanf(s, "translate (%f) %n",
+		else if (sscanf(s, " translate (%f)%n",
 					&e, &n) == 1)
 			;
-		else if (sscanf(s, "scale (%f %f) %n",
+		else if (sscanf(s, " scale (%f %f)%n",
 					&a, &d, &n) == 2)
 			;
-		else if (sscanf(s, "scale (%f) %n",
+		else if (sscanf(s, " scale (%f)%n",
 					&a, &n) == 1)
 			d = a;
-		else if (sscanf(s, "rotate (%f %f %f) %n",
+		else if (sscanf(s, " rotate (%f %f %f)%n",
 					&angle, &x, &y, &n) == 3) {
 			angle = angle / 180 * M_PI;
 			a = cos(angle);
@@ -1229,18 +1234,18 @@ void svgtiny_parse_transform(char *s, float *ma, float *mb,
 			d = cos(angle);
 			e = -x * cos(angle) + y * sin(angle) + x;
 			f = -x * sin(angle) - y * cos(angle) + y;
-		} else if (sscanf(s, "rotate (%f) %n",
+		} else if (sscanf(s, " rotate (%f)%n",
 					&angle, &n) == 1) {
 			angle = angle / 180 * M_PI;
 			a = cos(angle);
 			b = sin(angle);
 			c = -sin(angle);
 			d = cos(angle);
-		} else if (sscanf(s, "skewX (%f) %n",
+		} else if (sscanf(s, " skewX (%f)%n",
 					&angle, &n) == 1) {
 			angle = angle / 180 * M_PI;
 			c = tan(angle);
-		} else if (sscanf(s, "skewY (%f) %n",
+		} else if (sscanf(s, " skewY (%f)%n",
 					&angle, &n) == 1) {
 			angle = angle / 180 * M_PI;
 			b = tan(angle);
