@@ -107,8 +107,6 @@ svgtiny_code svgtiny_parse(struct svgtiny_diagram *diagram,
 
     svg = document->documentElement();
     
-    std::cout << svg->localName() << std::endl;
-    
 	if (!svg)
 		return svgtiny_NOT_SVG;
     if (svg->localName().compare("svg") != 0)
@@ -201,8 +199,6 @@ svgtiny_code svgtiny_parse_svg(Poco::XML::Element *svg,
 		svgtiny_code code = svgtiny_OK;
         
         child = (Poco::XML::Element *) cnl->item(i);
-        
-        std::cout << child->localName() << std::endl;
 
         // I think this can't happen?
 		if (child->nodeType() == Poco::XML::Element::ELEMENT_NODE) {
