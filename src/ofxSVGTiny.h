@@ -1,6 +1,7 @@
 #pragma once
 
 #include "ofMain.h"
+#include "tinyxml.h"
 
 //extern "C"
 //{
@@ -18,10 +19,13 @@ public:
 	void load(string path);
 	void draw();
 	
+	float getWidth() const { return width; }
+	float getHeight() const { return height; }
 	int getNumPath() { return paths.size(); }
 	ofPath& getPathAt(int n) { return *paths[n]; }
 
 private:
+	float width, height;
 
 	typedef ofPtr<ofPath> ofPathRef;
 	vector<ofPathRef> paths;
