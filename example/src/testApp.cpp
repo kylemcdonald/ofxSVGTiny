@@ -1,9 +1,5 @@
 #include "testApp.h"
 
-#include "ofxSVGTiny.h"
-
-ofxSVGTiny svg;
-
 //--------------------------------------------------------------
 void testApp::setup()
 {
@@ -13,7 +9,7 @@ void testApp::setup()
 	ofBackground(0);
 	ofSetColor(255);
 	
-	svg.load("tiger.svg");
+	svg.load("tiger.svg"); // works
 }
 
 float step;
@@ -32,83 +28,91 @@ void testApp::update()
 void testApp::draw()
 {
 	
-	svg.draw();
-	
-	glTranslatef(450, 0, 0);
-	
-	for (int i = 0; i < svg.getNumPath(); i++)
-	{
-		ofPath &p = svg.getPathAt(i);
+	ofPushMatrix();
+	ofTranslate(ofGetWidth() / 2, ofGetHeight() / 2);
+	ofRotate(mouseX);
+	float scale = ofMap(mouseY, 0, ofGetHeight(), .5, 10);
+	ofScale(scale, scale, scale);
+	ofTranslate(-svg.getWidth() / 2, -svg.getHeight() / 2);
+	if(ofGetMousePressed()) {
 		
-		vector<ofPolyline>& lines = p.getOutline();
-		
-		for (int k = 0; k < lines.size(); k++)
+		for (int i = 0; i < svg.getNumPath(); i++)
 		{
-			ofPolyline line = lines[k].getResampledBySpacing(1);
+			ofPath &p = svg.getPathAt(i);
 			
-			int num = step * line.size();
+			vector<ofPolyline>& lines = p.getOutline();
 			
-			glBegin(GL_LINE_STRIP);
-			for (int j = 0; j < num; j++)
+			for (int k = 0; k < lines.size(); k++)
 			{
-				ofVec3f &vv = line[j];
-				glVertex3f(vv.x, vv.y, vv.z);
+				ofPolyline line = lines[k].getResampledBySpacing(1);
+				
+				int num = step * line.size();
+				
+				glBegin(GL_LINE_STRIP);
+				for (int j = 0; j < num; j++)
+				{
+					ofVec3f &vv = line[j];
+					glVertex3f(vv.x, vv.y, vv.z);
+				}
+				glEnd();
 			}
-			glEnd();
 		}
+	} else {
+		svg.draw();
 	}
+	
+	ofPopMatrix();
 }
 
 //--------------------------------------------------------------
 void testApp::keyPressed(int key)
 {
-
+	
 }
 
 //--------------------------------------------------------------
 void testApp::keyReleased(int key)
 {
-
+	
 }
 
 //--------------------------------------------------------------
 void testApp::mouseMoved(int x, int y)
 {
-
+	
 }
 
 //--------------------------------------------------------------
 void testApp::mouseDragged(int x, int y, int button)
 {
-
+	
 }
 
 //--------------------------------------------------------------
 void testApp::mousePressed(int x, int y, int button)
 {
-
+	
 }
 
 //--------------------------------------------------------------
 void testApp::mouseReleased(int x, int y, int button)
 {
-
+	
 }
 
 //--------------------------------------------------------------
 void testApp::windowResized(int w, int h)
 {
-
+	
 }
 
 //--------------------------------------------------------------
 void testApp::gotMessage(ofMessage msg)
 {
-
+	
 }
 
 //--------------------------------------------------------------
 void testApp::dragEvent(ofDragInfo dragInfo)
 {
-
 }
