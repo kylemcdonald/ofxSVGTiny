@@ -10,10 +10,6 @@
 		27BC9C4D15930A3A004D7F68 /* main.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 27BC9C4A15930A3A004D7F68 /* main.cpp */; };
 		27BC9C4E15930A3A004D7F68 /* testApp.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 27BC9C4B15930A3A004D7F68 /* testApp.cpp */; };
 		27C086E8159307220036906F /* ofxSVGTiny.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 27C086E2159307220036906F /* ofxSVGTiny.cpp */; };
-		27C08747159307400036906F /* tinyxml.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 27C08740159307400036906F /* tinyxml.cpp */; };
-		27C08748159307400036906F /* tinyxmlerror.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 27C08742159307400036906F /* tinyxmlerror.cpp */; };
-		27C08749159307400036906F /* tinyxmlparser.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 27C08743159307400036906F /* tinyxmlparser.cpp */; };
-		27C0874A159307400036906F /* ofxXmlSettings.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 27C08745159307400036906F /* ofxXmlSettings.cpp */; };
 		27C08763159308320036906F /* src_colors.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 27C0875D159308320036906F /* src_colors.cpp */; };
 		27C08764159308320036906F /* svgtiny_gradient.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 27C0875E159308320036906F /* svgtiny_gradient.cpp */; };
 		27C08765159308320036906F /* svgtiny_list.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 27C08760159308320036906F /* svgtiny_list.cpp */; };
@@ -71,12 +67,6 @@
 		27BC9C4C15930A3A004D7F68 /* testApp.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = testApp.h; path = src/testApp.h; sourceTree = SOURCE_ROOT; };
 		27C086E2159307220036906F /* ofxSVGTiny.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = ofxSVGTiny.cpp; path = ../../../addons/ofxSVGTiny/src/ofxSVGTiny.cpp; sourceTree = SOURCE_ROOT; };
 		27C086E3159307220036906F /* ofxSVGTiny.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = ofxSVGTiny.h; path = ../../../addons/ofxSVGTiny/src/ofxSVGTiny.h; sourceTree = SOURCE_ROOT; };
-		27C08740159307400036906F /* tinyxml.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = tinyxml.cpp; path = ../../../addons/ofxXmlSettings/libs/tinyxml.cpp; sourceTree = SOURCE_ROOT; };
-		27C08741159307400036906F /* tinyxml.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = tinyxml.h; path = ../../../addons/ofxXmlSettings/libs/tinyxml.h; sourceTree = SOURCE_ROOT; };
-		27C08742159307400036906F /* tinyxmlerror.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = tinyxmlerror.cpp; path = ../../../addons/ofxXmlSettings/libs/tinyxmlerror.cpp; sourceTree = SOURCE_ROOT; };
-		27C08743159307400036906F /* tinyxmlparser.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = tinyxmlparser.cpp; path = ../../../addons/ofxXmlSettings/libs/tinyxmlparser.cpp; sourceTree = SOURCE_ROOT; };
-		27C08745159307400036906F /* ofxXmlSettings.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = ofxXmlSettings.cpp; path = ../../../addons/ofxXmlSettings/src/ofxXmlSettings.cpp; sourceTree = SOURCE_ROOT; };
-		27C08746159307400036906F /* ofxXmlSettings.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = ofxXmlSettings.h; path = ../../../addons/ofxXmlSettings/src/ofxXmlSettings.h; sourceTree = SOURCE_ROOT; };
 		27C0875D159308320036906F /* src_colors.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = src_colors.cpp; path = ../../../addons/ofxSVGTiny/lib/src_colors.cpp; sourceTree = SOURCE_ROOT; };
 		27C0875E159308320036906F /* svgtiny_gradient.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = svgtiny_gradient.cpp; path = ../../../addons/ofxSVGTiny/lib/svgtiny_gradient.cpp; sourceTree = SOURCE_ROOT; };
 		27C0875F159308320036906F /* svgtiny_internal.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = svgtiny_internal.h; path = ../../../addons/ofxSVGTiny/lib/svgtiny_internal.h; sourceTree = SOURCE_ROOT; };
@@ -152,38 +142,6 @@
 			path = ../../../addons/ofxSVGTiny/src;
 			sourceTree = SOURCE_ROOT;
 		};
-		27C0873E159307400036906F /* ofxXmlSettings */ = {
-			isa = PBXGroup;
-			children = (
-				27C0873F159307400036906F /* libs */,
-				27C08744159307400036906F /* src */,
-			);
-			name = ofxXmlSettings;
-			path = ../../../addons/ofxXmlSettings;
-			sourceTree = SOURCE_ROOT;
-		};
-		27C0873F159307400036906F /* libs */ = {
-			isa = PBXGroup;
-			children = (
-				27C08740159307400036906F /* tinyxml.cpp */,
-				27C08741159307400036906F /* tinyxml.h */,
-				27C08742159307400036906F /* tinyxmlerror.cpp */,
-				27C08743159307400036906F /* tinyxmlparser.cpp */,
-			);
-			name = libs;
-			path = ../../../addons/ofxXmlSettings/libs;
-			sourceTree = SOURCE_ROOT;
-		};
-		27C08744159307400036906F /* src */ = {
-			isa = PBXGroup;
-			children = (
-				27C08745159307400036906F /* ofxXmlSettings.cpp */,
-				27C08746159307400036906F /* ofxXmlSettings.h */,
-			);
-			name = src;
-			path = ../../../addons/ofxXmlSettings/src;
-			sourceTree = SOURCE_ROOT;
-		};
 		27D81DE6158D2BA400A29153 /* ofxSVGTiny */ = {
 			isa = PBXGroup;
 			children = (
@@ -196,7 +154,6 @@
 		BB4B014C10F69532006C3DED /* addons */ = {
 			isa = PBXGroup;
 			children = (
-				27C0873E159307400036906F /* ofxXmlSettings */,
 				27D81DE6158D2BA400A29153 /* ofxSVGTiny */,
 			);
 			name = addons;
@@ -362,10 +319,6 @@
 			buildActionMask = 2147483647;
 			files = (
 				27C086E8159307220036906F /* ofxSVGTiny.cpp in Sources */,
-				27C08747159307400036906F /* tinyxml.cpp in Sources */,
-				27C08748159307400036906F /* tinyxmlerror.cpp in Sources */,
-				27C08749159307400036906F /* tinyxmlparser.cpp in Sources */,
-				27C0874A159307400036906F /* ofxXmlSettings.cpp in Sources */,
 				27C08763159308320036906F /* src_colors.cpp in Sources */,
 				27C08764159308320036906F /* svgtiny_gradient.cpp in Sources */,
 				27C08765159308320036906F /* svgtiny_list.cpp in Sources */,

@@ -9,7 +9,38 @@
 #define SVGTINY_H
 
 //#include <libxml/parser.h>
-#include "tinyxml.h"
+#include "Poco/URIStreamOpener.h"  
+#include "Poco/StreamCopier.h"  
+#include "Poco/Path.h"  
+#include "Poco/URI.h"  
+#include "Poco/Exception.h"  
+#include "Poco/Net/HTTPStreamFactory.h"  
+#include "Poco/XML/XMLString.h"  
+#include "Poco/DOM/DOMParser.h"  
+#include "Poco/DOM/Document.h"  
+#include "Poco/DOM/Attr.h"  
+#include "Poco/DOM/NodeIterator.h"  
+#include "Poco/DOM/NodeFilter.h"  
+#include "Poco/DOM/NamedNodeMap.h"   
+#include "Poco/DOM/ChildNodesList.h"
+
+#include <iostream>
+#include <string>
+
+using Poco::URIStreamOpener;  
+using Poco::StreamCopier;  
+using Poco::Path;  
+using Poco::URI;  
+using Poco::Exception;  
+using Poco::Net::HTTPStreamFactory;
+//using Poco::XML;
+//using Poco::XML::XMLString;
+//using Poco::XML::DOMParser;  
+//using Poco::XML::Document;  
+//using Poco::XML::NodeIterator;  
+//using Poco::XML::NodeFilter;  
+//using Poco::XML::Node;  
+//using Poco::XML::NamedNodeMap; 
 
 typedef int svgtiny_colour;
 #define svgtiny_TRANSPARENT 0x1000000
