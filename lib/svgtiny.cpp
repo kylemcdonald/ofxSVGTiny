@@ -467,10 +467,11 @@ svgtiny_code svgtiny_parse_path(Poco::XML::Element *path,
 				&rx, &ry, &rotation, &large_arc, &sweep,
 				&x, &y, &n) == 7);
 
+		} else if (sscanf(s, " %n", &n) || n) {
+			// consume whitespace at the end of a line
+			s += n;
 		} else {
 			fprintf(stderr, "parse failed at \"%s\"\n", s);
-			cout << "error at character " << (int) (send - s) << endl;
-			cout << attrString << endl;
 			break;
 		}
 	}
