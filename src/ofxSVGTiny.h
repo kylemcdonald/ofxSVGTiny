@@ -1,13 +1,7 @@
 #pragma once
 
 #include "ofMain.h"
-
-//extern "C"
-//{
-
-#define __cplusplus
 #include "svgtiny.h"
-//};
 
 class ofxSVGTiny
 {

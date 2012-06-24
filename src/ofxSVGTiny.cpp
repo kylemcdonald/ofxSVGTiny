@@ -54,7 +54,6 @@ void ofxSVGTiny::draw()
 	}
 }
 
-
 void ofxSVGTiny::setupDiagram(struct svgtiny_diagram *diagram)
 {
 	width = diagram->width, height = diagram->height;
