@@ -12,6 +12,11 @@ bool ofxSVGTiny::load(string path)
 	ofBuffer buffer = ofBufferFromFile(path);
 	size_t size = buffer.size();
 	
+	if(size == 0)
+	{
+		return false;
+	}
+
 	struct svgtiny_diagram *diagram = svgtiny_create();
 	svgtiny_code code = svgtiny_parse(diagram, buffer.getText().c_str(), size, path.c_str(), 0, 0);
 	
