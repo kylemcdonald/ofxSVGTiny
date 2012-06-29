@@ -9,7 +9,7 @@ public:
 	
 	~ofxSVGTiny();
 	
-	void load(string path);
+	bool load(string path);
 	void draw();
 	
 	float getWidth() const { return width; }

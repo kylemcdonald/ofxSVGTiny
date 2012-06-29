@@ -5,7 +5,7 @@ ofxSVGTiny::~ofxSVGTiny()
 	paths.clear();
 }
 
-void ofxSVGTiny::load(string path)
+bool ofxSVGTiny::load(string path)
 {
 	path = ofToDataPath(path);
 	
@@ -39,11 +39,14 @@ void ofxSVGTiny::load(string path)
 				break;
 		}
 		fprintf(stderr, "\n");
+		return false;
 	}
 	
 	setupDiagram(diagram);
 	
 	svgtiny_free(diagram);
+
+	return true;
 }
 
 void ofxSVGTiny::draw()
